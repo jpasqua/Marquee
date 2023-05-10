@@ -1,0 +1,28 @@
+<script>
+  function showHide(elementID, show) {
+    var x = document.getElementById(elementID);
+    if (show) { x.style.display = 'block'; } else { x.style.display = 'none'; }
+  }
+  function isNumberKey(e) { var h = e.which ? e.which : event.keyCode; return !(h > 31 && (h < 48 || h > 57)) }
+</script>
+
+<form class='w3-container' action='/updateMQConfig' method='get'>
+  <h2>Marquee Settings:</h2>
+
+<p><label>Display home screen for (seconds):</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='homeScreenTime' value='%HS_TIME%' maxlength='5' onkeypress='return isNumberKey(event)'></p>
+  <p><label>Frame Delay (ms):</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='scrollDelay' value='%SCROLL_DELAY%' maxlength='10'></p>
+
+
+  <b>Adafruit IO</b><br>
+  <div class='w3-card-2 w3-round-large'>
+    <div class='w3-container w3-margin-bottom'>
+        <div class='w3-row'>
+          <p><label>Username</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioUsername' value='%AIO_USER%' maxlength='60'></p>
+          <p><label>Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioKey' value='%AIO_KEY%' maxlength='60'></p>
+          <p><label>Group</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioGroup' value='%AIO_GROUP%' maxlength='60'></p>
+        </div>
+    </div>
+  </div>
+
+  <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
+</form>

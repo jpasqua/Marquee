@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "enabled":true,
+  "username": "USER",
+  "key": "KEY",
+  "groups": [
+    "backyard-weather-station",
+    "office-weather-station"
+  ],
+  "nicknames": ["Backyard", "Office"],
+  "refreshInterval": 10,
+  "feeds": [
+    "0.temp",
+    "0.humidity",
+    "0.barometer",
+    "1.temp",
+    "1.humidity",
+    "1.barometer"
+   ],
+  "riScale": 60000
+}

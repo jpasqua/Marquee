@@ -1,0 +1,48 @@
+{
+  "items": [
+    {
+      "x": "50",
+      "font": "_5x7",
+      "format": "%s ",
+      "type": "STRING",
+      "key": "NN1"
+    },
+    {
+      "format": "%0.1fF, ",
+      "type": "FLOAT",
+      "key": "0.temp"
+    },
+    {
+      "format": "%.0f%%, ",
+      "type": "FLOAT",
+      "key": "0.humidity"
+    },
+    {
+      "format": "%.2finHg",
+      "type": "FLOAT",
+      "key": "0.barometer"
+    },
+    {
+      "format": " | %s ",
+      "type": "STRING",
+      "key": "NN2"
+    },
+    {
+      "format": "%0.1fF, ",
+      "type": "FLOAT",
+      "key": "1.temp"
+    },
+    {
+      "format": "%.0f%%, ",
+      "type": "FLOAT",
+      "key": "1.humidity"
+    },
+    {
+      "format": "%.2finHg",
+      "type": "FLOAT",
+      "key": "1.barometer"
+    }
+  ],
+  "bkg": "0x000000",
+  "screenID": "AIO_W"
+}

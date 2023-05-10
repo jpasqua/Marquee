@@ -1,0 +1,67 @@
+{
+	"days": [
+	  {
+	  	"when": [[0, 1, 1]],
+	  	"msgs": ["Happy New Year!", "It's a New Year!"]
+	  },
+	  {
+	  	"when": [[0, 2, 16]],
+	  	"msgs": ["It's your real birthday!"]
+	  },
+	  {
+	  	"when": [[0, 2, 17]],
+	  	"msgs": ["Happy Birthday!", "Enjoy Your Bday!", "It's your official birthday!"]
+	  },
+	  {
+	  	"when": [[0, 12, 25]],
+	  	"msgs": ["Merry Christmas", "Buon Natale"]
+	  },
+	  {
+	  	"when": [
+	  		[2024, 3, 31], [2025, 4, 20], [2026, 4,  5], [2027, 3, 28], [2028, 4, 16],
+	  		[2029, 4,  1], [2030, 4, 21], [2031, 4, 13], [2032, 3, 28]
+	  	],
+		"msgs": ["Happy Easter!", "He is Risen", "Find those eggs!"]
+	  },
+	  {
+	  	"when": [
+	  		[2023, 11, 23], [2024, 11, 28], [2025, 11, 27], [2026, 11, 26], [2027, 11, 25],
+	  		[2028, 11, 23], [2029, 11, 22], [2030, 11, 28], [2031, 11, 27], [2032, 11, 25], [2033, 11, 24]
+	  	],
+		"msgs": ["gobble gobble", "Happy Thanksgiving", "Give Thanks for Family"]
+	  },
+	  {
+	  	"when": [
+	  		[2024, 2, 28], [2025, 2, 27], [2026, 2, 26], [2027, 2, 25], [2028, 2, 23],
+	  		[2029, 2, 22], [2030, 2, 28], [2031, 2, 27], [2032, 2, 24], [2033, 2, 25]
+	  	],
+		"msgs": ["Happy Bday George and Abe!"]
+	  }
+	],
+	"times": [
+		{
+			"start": 6, "end": 12,
+			"msgs": ["Good morning", "Have a great day", "Rise and shine!"]
+		},
+		{
+			"start": 12, "end": 17,
+			"msgs": ["Enjoy the afternoon", "How's your day going?", "Good afternoon"]
+		},
+		{
+			"start": 17, "end": 19,
+			"msgs": ["Enjoy dinner", "Have you eaten yet?"]
+		},
+		{
+			"start": 19, "end": 23,
+			"msgs": ["Have a good evening", "Time to watch youtube", "Time to relax"]
+		},
+		{
+			"start": 23, "end": 4,
+			"msgs": ["Are you still up!?", "What are you doing up?"]
+		},
+		{
+			"start": 4, "end": 6,
+			"msgs": ["What are you doing up so early?"]
+		}
+	]
+}
