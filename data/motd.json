@@ -63,5 +63,15 @@
 			"start": 4, "end": 6,
 			"msgs": ["What are you doing up so early?"]
 		}
-	]
+	],
+	"dotw": [
+		["Sunday is Fun-day", "It's a day for rest", "Happy Sunday!"],
+		["Mondays should be optional", "Is it Monday again!?"],
+		["You made it through Monday", "Happy Tuesday"],
+		["It's Hump Day!", "Half way to the weekend"],
+		["It's almost Friday!", "It's Friday Eve", "It's teeny tiny Friday"],
+		["TGIF!", "Fri-nally", "Hello weekend", "If Friday had a face, I would kiss it"],
+		["Smile, It's Saturday!", "Saturdays are for fun"]
+	],
+	"dotwCount": 3
 }

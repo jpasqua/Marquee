@@ -73,22 +73,29 @@ void MOTDScreen::updateText() {
   int theMonth = month(timeNow);
   int theHour = hour(timeNow);
 
+  counter++;
+
   // Check whether we're on a special day
   for (auto d: msgs.dayMsgs) {
     if (d.month == theMonth && d.day == theDay) {
-      // Pick a message at random
-      int i = random(0, d.msgs.size());
-      setText(d.msgs[i], Display.BuiltInFont_ID);
+      setText(d.msgs[random(0, d.msgs.size())], Display.BuiltInFont_ID);
+Log.verbose("Using special day messages");
       return;
     }
   }
 
-  // Find a matching time interval
+  if (counter > msgs.dotwCount) {
+    counter = 0;
+    std::vector<String>& v = msgs.daysOfTheWeek[weekday()-1];
+    setText(v[random(0, v.size())], Display.BuiltInFont_ID);
+Log.verbose("Using dotw messages");
+    return;
+  }
+
   for (auto t: msgs.timeMsgs) {
     if (theHour >= t.startHour && theHour < t.endHour) {
-      // Pick a message at random
-      int i = random(0, t.msgs.size());
-      setText(t.msgs[i], Display.BuiltInFont_ID);
+      setText(t.msgs[random(0, t.msgs.size())], Display.BuiltInFont_ID);
+Log.verbose("Using time interval messages");
       return;
     }
   }
@@ -156,6 +163,17 @@ void Messages::fromJSON(DynamicJsonDocument& doc) {
     }
     timeMsgs.push_back(t);
   }
+
+  int dayIndex = 0;
+  JsonArray dotw = doc["dotw"];
+  for (JsonArray messages : dotw) {
+    for (const char* message : messages) {
+      daysOfTheWeek[dayIndex].push_back(message);
+    }
+    dayIndex++;
+  }
+
+  dotwCount = doc["dotwCount"];
 }
 
 void Messages::toLog() {
@@ -169,6 +187,12 @@ void Messages::toLog() {
     Log.verbose("Messages for (%d, %d)", t.startHour, t.endHour);
     for (String m: t.msgs) {
       Log.verbose("    %s", m.c_str());
+    }
+  }
+  for (int i = 0; i < 7; i++) {
+    Log.verbose("%s", dayStr(i+1));
+    for (String m : daysOfTheWeek[i]) {
+      Log.verbose("  %s", m.c_str());
     }
   }
 }

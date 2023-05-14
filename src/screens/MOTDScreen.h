@@ -36,6 +36,8 @@ class Messages {
 public:
   std::vector<TimeMessages> timeMsgs;
   std::vector<DayMessages> dayMsgs;
+  std::vector<String> daysOfTheWeek[7];
+  uint8_t dotwCount = 10;
 
   void fromJSON(DynamicJsonDocument& doc);
   void toLog();
@@ -53,6 +55,7 @@ public:
 private:
   bool firstActivation = true;
   Messages msgs;
+  uint16_t counter = 0;
 
   void readMessages(String filePath);
 
