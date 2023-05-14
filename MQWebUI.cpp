@@ -174,7 +174,7 @@ namespace MQWebUI {
         mqSettings->printMonitorEnabled = WebUI::hasArg(F("pmEnabled"));
 
         String hspType = WebUI::arg(F("hsp"));
-        if (hspType.equalsIgnoreCase("hortizontal")) mqSettings->homeScreenProgress = MQSettings::HSP_Horizontal;
+        if (hspType.equalsIgnoreCase("horizontal")) mqSettings->homeScreenProgress = MQSettings::HSP_Horizontal;
         else if (hspType.equalsIgnoreCase("vertical")) mqSettings->homeScreenProgress = MQSettings::HSP_Vertical;
         else mqSettings->homeScreenProgress = MQSettings::HSP_None;
 
