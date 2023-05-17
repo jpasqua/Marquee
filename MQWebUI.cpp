@@ -64,6 +64,7 @@ namespace MQWebUI {
       auto mapper =[&](const String &key, String& val) -> void {
         if (key == "SCROLL_DELAY")    val = mqSettings->scrollDelay;
         else if (key == "HS_TIME")    val = mqSettings->homeScreenTime;
+        else if (key.equals(F("WS_FIELDS"))) wtAppImpl->screens.weatherScreen->settings.toJSON(val);
         else if (key == "AIO_KEY")    val = mqSettings->aio.key;
         else if (key == "AIO_USER")   val = mqSettings->aio.username;
         else if (key == "AIO_GROUP")  val = mqSettings->aio.groupName;
@@ -133,6 +134,43 @@ namespace MQWebUI {
 
   // ----- BEGIN: MQWebUI::Endpoints
   namespace Endpoints {
+    void debugScreen() {
+      auto action = []() {
+        Display.mtx->reset();
+        Display.fillRect(0, 0, 8, 8, 1);
+        Display.fillRect(2, 2, 4, 4, 0);
+        WebUI::redirectHome();
+        delay(500);
+      };
+
+      WebUI::wrapWebAction("/debugScreen", action, false);
+    }
+
+    void updateWeatherFields() {
+      auto action = []() {
+        // We are handling an HTTP POST with a JSON payload. There isn't a specific function
+        // to get the payload from the request, instead ask for the arg named "plain"
+        String newFields = WebUI::arg("plain");
+        if (newFields.isEmpty()) {
+         WebUI::sendStringContent("text/plain", "No screens were selected", "400 Bad Request");
+          return;
+        }
+        wtAppImpl->screens.weatherScreen->settings.fromJSON(newFields);
+        wtAppImpl->screens.weatherScreen->settings.toJSON(WSSettings::settingsFilePath);
+        wtAppImpl->screens.weatherScreen->fieldsHaveBeenUpdated();
+        WebUI::sendStringContent("text/plain", "New weather screen fields were saved");
+      };
+      
+      WebUI::wrapWebAction("/updateWeatherFields", action);
+      if (ScreenMgr.curScreen() == wtAppImpl->screens.weatherScreen) {
+        ScreenMgr.moveThroughSequence(true);
+        // If we happen to be in the middle of the weather screen we  
+        // move to the next screen to avoid confusion of the fields changing.
+        // Do this after wrapWebAction so the newly displayed screen doesn't end
+        // up having the ActivityIcon restored from the previous screen.
+      }
+    }
+
     // Handler for the "/updatePHConfig" endpoint. This is invoked as the target
     // of the form presented by "/displayMQConfig". It updates the values of the
     // corresponding settings and writes the settings to EEPROM.
@@ -217,8 +255,11 @@ namespace MQWebUI {
     WebUI::registerHandler("/presentPrinterConfig",   Pages::presentPrinterConfig);
     WebUI::registerHandler("/presentMOTDPage",        Pages::presentMOTDPage);
 
+    WebUI::registerHandler("/updateWeatherFields",    Endpoints::updateWeatherFields);
     WebUI::registerHandler("/updatePrinterConfig",    Endpoints::updatePrinterConfig);
     WebUI::registerHandler("/updateMQConfig",         Endpoints::updateMQConfig);
+
+    WebUI::registerHandler("/debugScreen",            Endpoints::debugScreen);
   }
 
 }

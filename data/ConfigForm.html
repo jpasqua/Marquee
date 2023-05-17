@@ -26,3 +26,81 @@
 
   <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
 </form>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
+<style type="text/css">
+  .sortItem { border-style: solid; margin:2px; padding:4px; float: left; }
+  .ghost {
+      color: #fff;
+      background-color: #00C;
+      position: relative;
+      opacity: 0.4;
+  }
+</style>
+
+<div class="w3-card-2 w3-round-large w3-margin">
+  <div class="w3-container w3-margin-bottom">
+    <b>Weather Screen Fields</b>
+    <div class='w3-row w3-padding'>
+      Select the fields you'd like to see and drag them into your preferred order
+      <div id="sortablelist" class="w3-margin-bottom">
+      </div>
+      <div class="w3-row w3-padding"></div>
+      <div class="w3-row">
+        <input type="button" value='Save' onclick="createResultList()">
+        &nbsp;<span id='RESULT' class='w3-margin-left' style='font-style: italic;'></span>
+      </div>
+    </div>
+  </div>
+</div>
+  
+<script type="text/javascript">
+  function showResult(status, data) {
+    $('#RESULT').attr('style', 'color:' + (status ? 'green' : 'red'));
+    $('#RESULT').html((status ? 'Success' : 'Error') + ': ' + data);
+    setTimeout(function() {
+      $("#RESULT").fadeOut("slow", function() {
+        $('#RESULT').html('');
+        $('#RESULT').attr("style","display:block");
+      }
+    );
+    } ,3000);
+  }
+  function createResultList() {
+    var resultList = { fields: [] };
+    $( "#sortablelist" ).children().each( function( index, element ) {
+      var item = element.getElementsByClassName('order')[0];
+      resultList.fields.push({id: item.name, on: item.checked});
+    });
+    console.log(resultList);
+    $('#RESULT').attr('style', 'color: #808080');
+    $('#RESULT').html("Updating weather fields...");
+    $.ajax({
+        // url: 'https://httpbin.org/get',
+        url: '/updateWeatherFields',
+        type: 'post',
+        dataType: 'text',
+        contentType: 'application/json',
+        success: function(data) { showResult(true, data) },
+        error: function(data) { showResult(false, data) },
+        data: JSON.stringify(resultList)
+    });
+  }
+  function createList(fields) {
+    for(var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        $('#sortablelist').append(
+          "<div class='sortItem'>" +
+          "  <input class='order' type='checkbox' name='" + field.id + "' " +
+             (field.on ? "checked>" : ">") +
+          "  <label for='" + field.id + "'>&nbsp;" + field.id + "</label>" +
+          "</div>"
+          );
+      }
+  }
+  var sequence = JSON.parse(`%WS_FIELDS%`);
+
+  createList(sequence.fields);
+  new Sortable(sortablelist, { animation: 150, ghostClass: 'ghost' });
+</script>
