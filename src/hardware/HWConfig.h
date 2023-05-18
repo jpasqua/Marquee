@@ -49,7 +49,8 @@
   constexpr uint8_t vDisplays = 1;
 
   // ----- Buttons
-  constexpr Basics::Pin physicalButtons[] = { D3 }; // This is the "Flash" button
+  // constexpr Basics::Pin physicalButtons[] =  { D3 }; // This is the "Flash" button
+  constexpr Basics::Pin physicalButtons[] =  { Basics::UnusedPin };
   constexpr Basics::Pin syntheticGrounds[] = { Basics::UnusedPin };
 
 #elif (SelectedConfig == Config_ESP32Mini)
