@@ -30,7 +30,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
 <style type="text/css">
-  .sortItem { border-style: solid; margin:2px; padding:4px; float: left; }
+  .sortItem { border-style: solid; margin:1px; padding:4px; float: left; }
   .ghost {
       color: #fff;
       background-color: #00C;
@@ -91,7 +91,7 @@
     for(var i = 0; i < fields.length; i++) {
         var field = fields[i];
         $('#sortablelist').append(
-          "<div class='sortItem'>" +
+          "<div class='sortItem w3-theme-light'>" +
           "  <input class='order' type='checkbox' name='" + field.id + "' " +
              (field.on ? "checked>" : ">") +
           "  <label for='" + field.id + "'>&nbsp;" + field.id + "</label>" +
