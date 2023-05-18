@@ -44,11 +44,11 @@
     <b>Weather Screen Fields</b>
     <div class='w3-row w3-padding'>
       Select the fields you'd like to see and drag them into your preferred order
-      <div id="sortablelist" class="w3-margin-bottom">
+      <div id="weatherFields" class="w3-margin-bottom">
       </div>
       <div class="w3-row w3-padding"></div>
       <div class="w3-row">
-        <input type="button" value='Save' onclick="createResultList()">
+        <input type="button" value='Save' onclick="createResultList('#weatherFields', '/updateWeatherFields')">
         &nbsp;<span id='RESULT' class='w3-margin-left' style='font-style: italic;'></span>
       </div>
     </div>
@@ -67,9 +67,9 @@
     );
     } ,3000);
   }
-  function createResultList() {
+  function createResultList(fromFields, saveAction) {
     var resultList = { fields: [] };
-    $( "#sortablelist" ).children().each( function( index, element ) {
+    $( fromFields ).children().each( function( index, element ) {
       var item = element.getElementsByClassName('order')[0];
       resultList.fields.push({id: item.name, on: item.checked});
     });
@@ -78,7 +78,7 @@
     $('#RESULT').html("Updating weather fields...");
     $.ajax({
         // url: 'https://httpbin.org/get',
-        url: '/updateWeatherFields',
+        url: saveAction,
         type: 'post',
         dataType: 'text',
         contentType: 'application/json',
@@ -87,10 +87,10 @@
         data: JSON.stringify(resultList)
     });
   }
-  function createList(fields) {
+  function createList(fields, onElement) {
     for(var i = 0; i < fields.length; i++) {
         var field = fields[i];
-        $('#sortablelist').append(
+        $(onElement).append(
           "<div class='sortItem w3-theme-light'>" +
           "  <input class='order' type='checkbox' name='" + field.id + "' " +
              (field.on ? "checked>" : ">") +
@@ -99,8 +99,8 @@
           );
       }
   }
-  var sequence = JSON.parse(`%WS_FIELDS%`);
+  var weatherSequence = JSON.parse(`%WS_FIELDS%`);
 
-  createList(sequence.fields);
-  new Sortable(sortablelist, { animation: 150, ghostClass: 'ghost' });
+  createList(weatherSequence.fields, '#weatherFields');
+  new Sortable(weatherFields, { animation: 150, ghostClass: 'ghost' });
 </script>
