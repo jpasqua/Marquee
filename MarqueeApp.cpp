@@ -190,6 +190,10 @@ Screen* MarqueeApp::app_registerScreens() {
   // sequence.push_back(wtAppImpl->screens.infoScreen);
 
   ScreenMgr.reconcileScreenSequence(mqSettings->screenSettings);
+if (mqSettings->scrollDelay == 0) {
+  Log.warning("MarqueeApp::app_registerScreens: mqSettings->scrollDelay == 0");
+  mqSettings->scrollDelay = 40;
+}
   ScrollScreen::setDefaultFrameDelay(mqSettings->scrollDelay);
 
   return splashScreen;
