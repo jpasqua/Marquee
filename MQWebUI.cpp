@@ -64,24 +64,18 @@ namespace MQWebUI {
       auto mapper =[&](const String &key, String& val) -> void {
         if (key == "SCROLL_DELAY")    val = mqSettings->scrollDelay;
         else if (key == "HS_TIME")    val = mqSettings->homeScreenTime;
-        else if (key.equals(F("WS_FIELDS"))) wtAppImpl->screens.weatherScreen->settings.toJSON(val);
+
         else if (key == "AIO_KEY")    val = mqSettings->aio.key;
         else if (key == "AIO_USER")   val = mqSettings->aio.username;
         else if (key == "AIO_GROUP")  val = mqSettings->aio.groupName;
-        else if (key == "LAT")        val = WebThing::settings.latAsString();
-        else if (key == "LNG")        val = WebThing::settings.lngAsString();
-        else if (key == "GMAPS_KEY")  val = WebThing::settings.googleMapsKey;
-        else if (key.equals(F("CITYID"))) {
-          if (wtApp->settings->owmOptions.enabled) val = wtApp->settings->owmOptions.cityID;
-          else val.concat("5380748");  // Palo Alto, CA, USA
-        }
-        else if (key.equals(F("WEATHER_KEY"))) val = wtApp->settings->owmOptions.key;
-        else if (key.equals(F("UNITS"))) val = wtApp->settings->uiOptions.useMetric ? "metric" : "imperial";
-        else if (key == "VLTG") {
-          float voltage = WebThing::measureVoltage();
-          if (voltage == -1) val = "N/A";
-          else val = (String(voltage, 2) + "V");
-        }
+
+        else if (key.equals(F("WS_FIELDS"))) wtAppImpl->screens.weatherScreen->settings.toJSON(val);
+
+        else if (key == "FS_HEAD") val = wtAppImpl->screens.forecastScreen->settings.heading;
+        else if (key == "FS_CITY") val = WebUIHelper::checkedOrNot[
+            wtAppImpl->screens.forecastScreen->settings.showCity];
+        else if (key == "FS_CITY_FIRST") val = WebUIHelper::checkedOrNot[
+            wtAppImpl->screens.forecastScreen->settings.cityBeforeHeading];
       };
 
       WebUI::wrapWebPage("/presentMQconfig", "/ConfigForm.html", mapper);
@@ -156,8 +150,7 @@ namespace MQWebUI {
           return;
         }
         wtAppImpl->screens.weatherScreen->settings.fromJSON(newFields);
-        wtAppImpl->screens.weatherScreen->settings.toJSON(WSSettings::settingsFilePath);
-        wtAppImpl->screens.weatherScreen->fieldsHaveBeenUpdated();
+        wtAppImpl->screens.weatherScreen->settingsHaveChanged();
         WebUI::sendStringContent("text/plain", "New weather screen fields were saved");
       };
       
@@ -183,11 +176,21 @@ namespace MQWebUI {
     //
     void updateMQConfig() {
       auto action = []() {
+        // General Settings
+        mqSettings->scrollDelay = WebUI::arg("scrollDelay").toInt();
+        mqSettings->homeScreenTime = WebUI::arg("homeScreenTime").toInt();
+        
+        // AIO Settings
         mqSettings->aio.key = WebUI::arg("aioKey");
         mqSettings->aio.username = WebUI::arg("aioUsername");
         mqSettings->aio.groupName = WebUI::arg("aioGroup");
-        mqSettings->scrollDelay = WebUI::arg("scrollDelay").toInt();
-        mqSettings->homeScreenTime = WebUI::arg("homeScreenTime").toInt();
+
+        // Forecast Screen Settings
+        wtAppImpl->screens.forecastScreen->settings.showCity = WebUI::hasArg("fcstCity");
+        wtAppImpl->screens.forecastScreen->settings.cityBeforeHeading = WebUI::hasArg("fcstCityFirst");
+        wtAppImpl->screens.forecastScreen->settings.heading = WebUI::arg("fcstHead");
+        wtAppImpl->screens.forecastScreen->settingsHaveChanged();
+        
         mqSettings->write();
 
         ScrollScreen::setDefaultFrameDelay(mqSettings->scrollDelay);

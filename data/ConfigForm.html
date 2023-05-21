@@ -7,11 +7,13 @@
 </script>
 
 <form class='w3-container' action='/updateMQConfig' method='get'>
-  <h2>Marquee Settings:</h2>
-
-<p><label>Display home screen for (seconds):</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='homeScreenTime' value='%HS_TIME%' maxlength='5' onkeypress='return isNumberKey(event)'></p>
-  <p><label>Frame Delay (ms):</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='scrollDelay' value='%SCROLL_DELAY%' maxlength='10'></p>
-
+  <b>General Settings</b><br>
+  <div class='w3-card-2 w3-round-large'>
+    <div class='w3-container w3-margin-bottom'>
+      <p><label>Display home screen for (seconds):</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='homeScreenTime' value='%HS_TIME%' maxlength='5' onkeypress='return isNumberKey(event)'></p>
+      <p><label>Frame Delay (ms):</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='scrollDelay' value='%SCROLL_DELAY%' maxlength='10'></p>
+    </div>
+  </div>
 
   <b>Adafruit IO</b><br>
   <div class='w3-card-2 w3-round-large'>
@@ -24,13 +26,26 @@
     </div>
   </div>
 
+  <b>Forecast Screen</b><br>
+  <div class='w3-card-2 w3-round-large'>
+    <div class='w3-container w3-margin-bottom'>
+        <div class='w3-row'>
+          <input name='fcstCity' class='w3-check' type='checkbox'%FS_CITY% >Display City Name?
+        </div>
+        <div class='w3-row'>
+          <input name='fcstCityFirst' class='w3-check' type='checkbox' %FS_CITY_FIRST%>Display City before heading?
+        </div>
+          <input name='fcstHead' class='w3-row w3-border w3-margin-bottom' type='input' value='%FS_HEAD%' placeholder="5-Day">
+    </div>
+  </div>
+
   <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
 </form>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
 <style type="text/css">
-  .sortItem { border-style: solid; margin:1px; padding:4px; float: left; }
+  .sortItem { border-style: solid; border-width: 1px; margin:1px; padding:4px; float: left; }
   .ghost {
       color: #fff;
       background-color: #00C;
@@ -39,10 +54,10 @@
   }
 </style>
 
-<div class="w3-card-2 w3-round-large w3-margin">
-  <div class="w3-container w3-margin-bottom">
-    <b>Weather Screen Fields</b>
-    <div class='w3-row w3-padding'>
+<div class="w3-container">
+<b>Weather Screen Fields</b><br>
+<div class="w3-card-2 w3-round-large">
+  <div class="w3-container w3-margin-bottom w3-padding">
       Select the fields you'd like to see and drag them into your preferred order
       <div id="weatherFields" class="w3-margin-bottom">
       </div>
@@ -54,7 +69,7 @@
     </div>
   </div>
 </div>
-  
+
 <script type="text/javascript">
   function showResult(status, data) {
     $('#RESULT').attr('style', 'color:' + (status ? 'green' : 'red'));
