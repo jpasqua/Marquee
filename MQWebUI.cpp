@@ -69,13 +69,8 @@ namespace MQWebUI {
         else if (key == "AIO_USER")   val = mqSettings->aio.username;
         else if (key == "AIO_GROUP")  val = mqSettings->aio.groupName;
 
-        else if (key.equals(F("WS_FIELDS"))) wtAppImpl->screens.weatherScreen->settings.toJSON(val);
-
-        else if (key == "FS_HEAD") val = wtAppImpl->screens.forecastScreen->settings.heading;
-        else if (key == "FS_CITY") val = WebUIHelper::checkedOrNot[
-            wtAppImpl->screens.forecastScreen->settings.showCity];
-        else if (key == "FS_CITY_FIRST") val = WebUIHelper::checkedOrNot[
-            wtAppImpl->screens.forecastScreen->settings.cityBeforeHeading];
+        else if (key.equals(F("WS_SETTINGS"))) wtAppImpl->screens.weatherScreen->settings.toJSON(val);
+        else if (key.equals(F("FS_SETTINGS"))) wtAppImpl->screens.forecastScreen->settings.toJSON(val);
       };
 
       WebUI::wrapWebPage("/presentMQconfig", "/ConfigForm.html", mapper);
@@ -140,24 +135,48 @@ namespace MQWebUI {
       WebUI::wrapWebAction("/debugScreen", action, false);
     }
 
-    void updateWeatherFields() {
+    void updateWSSettings() {
       auto action = []() {
         // We are handling an HTTP POST with a JSON payload. There isn't a specific function
         // to get the payload from the request, instead ask for the arg named "plain"
-        String newFields = WebUI::arg("plain");
-        if (newFields.isEmpty()) {
-         WebUI::sendStringContent("text/plain", "No screens were selected", "400 Bad Request");
+        String newSettings = WebUI::arg("plain");
+        if (newSettings.isEmpty()) {
+         WebUI::sendStringContent("text/plain", "WeatherScreen settings are empty", "400 Bad Request");
           return;
         }
-        wtAppImpl->screens.weatherScreen->settings.fromJSON(newFields);
+        wtAppImpl->screens.weatherScreen->settings.fromJSON(newSettings);
         wtAppImpl->screens.weatherScreen->settingsHaveChanged();
-        WebUI::sendStringContent("text/plain", "New weather screen fields were saved");
+        WebUI::sendStringContent("text/plain", "New WeatherScreen settings were saved");
       };
       
-      WebUI::wrapWebAction("/updateWeatherFields", action);
+      WebUI::wrapWebAction("/updateWSSettings", action);
       if (ScreenMgr.curScreen() == wtAppImpl->screens.weatherScreen) {
         ScreenMgr.moveThroughSequence(true);
-        // If we happen to be in the middle of the weather screen we  
+        // If we happen to be in the middle of the WeatherScreen we  
+        // move to the next screen to avoid confusion of the fields changing.
+        // Do this after wrapWebAction so the newly displayed screen doesn't end
+        // up having the ActivityIcon restored from the previous screen.
+      }
+    }
+
+    void updateFSSettings() {
+      auto action = []() {
+        // We are handling an HTTP POST with a JSON payload. There isn't a specific function
+        // to get the payload from the request, instead ask for the arg named "plain"
+        String newSettings = WebUI::arg("plain");
+        if (newSettings.isEmpty()) {
+         WebUI::sendStringContent("text/plain", "ForecastScreen settings are empty", "400 Bad Request");
+          return;
+        }
+        wtAppImpl->screens.forecastScreen->settings.fromJSON(newSettings);
+        wtAppImpl->screens.forecastScreen->settingsHaveChanged();
+        WebUI::sendStringContent("text/plain", "New ForecasetScreen settings were saved");
+      };
+      
+      WebUI::wrapWebAction("/updateFSSettings", action);
+      if (ScreenMgr.curScreen() == wtAppImpl->screens.forecastScreen) {
+        ScreenMgr.moveThroughSequence(true);
+        // If we happen to be in the middle of the forecast screen we  
         // move to the next screen to avoid confusion of the fields changing.
         // Do this after wrapWebAction so the newly displayed screen doesn't end
         // up having the ActivityIcon restored from the previous screen.
@@ -185,12 +204,6 @@ namespace MQWebUI {
         mqSettings->aio.username = WebUI::arg("aioUsername");
         mqSettings->aio.groupName = WebUI::arg("aioGroup");
 
-        // Forecast Screen Settings
-        wtAppImpl->screens.forecastScreen->settings.showCity = WebUI::hasArg("fcstCity");
-        wtAppImpl->screens.forecastScreen->settings.cityBeforeHeading = WebUI::hasArg("fcstCityFirst");
-        wtAppImpl->screens.forecastScreen->settings.heading = WebUI::arg("fcstHead");
-        wtAppImpl->screens.forecastScreen->settingsHaveChanged();
-        
         mqSettings->write();
 
         ScrollScreen::setDefaultFrameDelay(mqSettings->scrollDelay);
@@ -258,7 +271,8 @@ namespace MQWebUI {
     WebUI::registerHandler("/presentPrinterConfig",   Pages::presentPrinterConfig);
     WebUI::registerHandler("/presentMOTDPage",        Pages::presentMOTDPage);
 
-    WebUI::registerHandler("/updateWeatherFields",    Endpoints::updateWeatherFields);
+    WebUI::registerHandler("/updateWSSettings",       Endpoints::updateWSSettings);
+    WebUI::registerHandler("/updateFSSettings",       Endpoints::updateFSSettings);
     WebUI::registerHandler("/updatePrinterConfig",    Endpoints::updatePrinterConfig);
     WebUI::registerHandler("/updateMQConfig",         Endpoints::updateMQConfig);
 

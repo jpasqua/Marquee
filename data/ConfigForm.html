@@ -1,3 +1,5 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
 <script>
   function showHide(elementID, show) {
     var x = document.getElementById(elementID);
@@ -26,24 +28,6 @@
     </div>
   </div>
 
-  <b>Forecast Screen</b><br>
-  <div class='w3-card-2 w3-round-large'>
-    <div class='w3-container w3-margin-bottom'>
-        <div class='w3-row'>
-          <input name='fcstCity' class='w3-check' type='checkbox'%FS_CITY% >Display City Name?
-        </div>
-        <div class='w3-row'>
-          <input name='fcstCityFirst' class='w3-check' type='checkbox' %FS_CITY_FIRST%>Display City before heading?
-        </div>
-          <input name='fcstHead' class='w3-row w3-border w3-margin-bottom' type='input' value='%FS_HEAD%' placeholder="5-Day">
-    </div>
-  </div>
-
-  <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
-</form>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://raw.githack.com/SortableJS/Sortable/master/Sortable.js"></script>
 <style type="text/css">
   .sortItem { border-style: solid; border-width: 1px; margin:1px; padding:4px; float: left; }
   .ghost {
@@ -54,7 +38,6 @@
   }
 </style>
 
-<div class="w3-container">
 <b>Weather Screen Fields</b><br>
 <div class="w3-card-2 w3-round-large">
   <div class="w3-container w3-margin-bottom w3-padding">
@@ -63,45 +46,91 @@
       </div>
       <div class="w3-row w3-padding"></div>
       <div class="w3-row">
-        <input type="button" value='Save' onclick="createResultList('#weatherFields', '/updateWeatherFields')">
-        &nbsp;<span id='RESULT' class='w3-margin-left' style='font-style: italic;'></span>
+        <input type="button" value='Save' onclick="handleWeatherSave()">
+        &nbsp;<span id='WSResultArea' class='w3-margin-left' style='font-style: italic;'></span>
       </div>
     </div>
   </div>
-</div>
 
-<script type="text/javascript">
-  function showResult(status, data) {
-    $('#RESULT').attr('style', 'color:' + (status ? 'green' : 'red'));
-    $('#RESULT').html((status ? 'Success' : 'Error') + ': ' + data);
+<b>Forecast Screen Fields</b><br>
+<div class="w3-card-2 w3-round-large">
+  <div class="w3-container w3-margin-bottom w3-padding">
+      Select/Arrange the heading, and the fields for each day
+      <div style="flex">
+        <div style="border: solid 1px; float: left; padding: 2px; margin-right:10px">
+          <div id="fcstHeadFields" class="w3-margin-bottom"></div>
+        </div>
+        <div style="border: solid 1px; float: left; padding: 2px">
+         <div id="fcstFields" class="w3-margin-bottom"></div>
+        </div>
+      </div>
+
+      <div class="w3-row">
+        <label>Label:&nbsp;</label>
+        <input class='w3-input w3-border w3-margin-bottom' type='text' id='fcstLabel' name='fcstLabel' value='100' maxlength='60'>
+      </div>
+
+      <div class="w3-row">
+        <input type="button" value='Save' onclick="handleForecastSave();" >
+        &nbsp;<span id='FSResultArea' class='w3-margin-left' style='font-style: italic;'></span>
+      </div>
+    </div>
+  </div>
+
+<script>
+  function showResult(status, data, resultArea) {
+    $(resultArea).attr('style', 'color:' + (status ? 'green' : 'red'));
+    $(resultArea).html((status ? 'Success' : 'Error') + ': ' + data);
     setTimeout(function() {
-      $("#RESULT").fadeOut("slow", function() {
-        $('#RESULT').html('');
-        $('#RESULT').attr("style","display:block");
+      $(resultArea).fadeOut("slow", function() {
+        $(resultArea).html('');
+        $(resultArea).attr("style","display:block");
       }
     );
     } ,3000);
   }
-  function createResultList(fromFields, saveAction) {
-    var resultList = { fields: [] };
-    $( fromFields ).children().each( function( index, element ) {
+
+  function getList(fromElement) {
+    var resultList = [];
+    $( fromElement ).children().each( function( index, element ) {
       var item = element.getElementsByClassName('order')[0];
-      resultList.fields.push({id: item.name, on: item.checked});
+      resultList.push({id: item.name, on: item.checked});
     });
-    console.log(resultList);
-    $('#RESULT').attr('style', 'color: #808080');
-    $('#RESULT').html("Updating weather fields...");
+    return resultList;
+  }
+
+  function doSubmit(payload, saveAction, resultArea) {
+    $(resultArea).attr('style', 'color: #808080');
+    $(resultArea).html("Updating weather fields...");
     $.ajax({
         // url: 'https://httpbin.org/get',
         url: saveAction,
         type: 'post',
         dataType: 'text',
         contentType: 'application/json',
-        success: function(data) { showResult(true, data) },
-        error: function(data) { showResult(false, data) },
-        data: JSON.stringify(resultList)
+        success: function(data) { showResult(true, data, resultArea) },
+        error: function(data) { showResult(false, data, resultArea) },
+        data: JSON.stringify(payload)
     });
+
   }
+
+  function handleWeatherSave() {
+    var theSettings = { fields: getList('#weatherFields') };
+    doSubmit(theSettings, "/updateWSSettings", "#WSResultArea");
+    console.log(resultList);
+  }
+
+  function handleForecastSave() {
+    var theSettings = {
+      heading: getList('#fcstHeadFields'),
+      fields: getList('#fcstFields'),
+      label: $('#fcstLabel').val()
+    };
+    console.log(theSettings);
+    doSubmit(theSettings, "/updateFSSettings", "#FSResultArea");
+  }
+
   function createList(fields, onElement) {
     for(var i = 0; i < fields.length; i++) {
         var field = fields[i];
@@ -114,8 +143,16 @@
           );
       }
   }
-  var weatherSequence = JSON.parse(`%WS_FIELDS%`);
-
+  var weatherSequence = JSON.parse('%WS_SETTINGS%');
   createList(weatherSequence.fields, '#weatherFields');
   new Sortable(weatherFields, { animation: 150, ghostClass: 'ghost' });
+
+  var fcstSettings = JSON.parse('%FS_SETTINGS%');
+
+  createList(fcstSettings.heading, '#fcstHeadFields');
+  new Sortable(fcstHeadFields, { animation: 150, ghostClass: 'ghost' });
+
+  createList(fcstSettings.fields, '#fcstFields');
+  new Sortable(fcstFields, { animation: 150, ghostClass: 'ghost' });
+  $('#fcstLabel').val(fcstSettings.label);
 </script>
