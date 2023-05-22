@@ -17,6 +17,15 @@
 static inline uint16_t compose(int h, int m) { return(h * 100 + m); }
 
 HomeScreen::HomeScreen() {
+  settings.displayTime = UINT32_MAX;
+  settings.read();
+
+  if (settings.displayTime == UINT32_MAX) {
+    settings.displayTime = 240;
+    settings.pbOrientation = HSSettings::PBO_Vertical;
+    settings.write();
+  }
+
   _showInfoScreen = true;
 }
 
@@ -32,7 +41,7 @@ void HomeScreen::display(bool activating) {
 
   if (activating) {
     Display.setFont(Display.BuiltInFont_ID);
-    _nextScreenTime = millis() + mqSettings->homeScreenTime*1000L;
+    _nextScreenTime = millis() + settings.displayTime*1000L;
   }
 
   _colonVisible = false;
@@ -97,6 +106,10 @@ void HomeScreen::processPeriodicActivity() {
   }
 }
 
+void HomeScreen::settingsHaveChanged() {
+  settings.write();
+  _nextScreenTime = 0;  // Force an update
+}
 
 // ----- Private Functions
 
@@ -107,8 +120,8 @@ void HomeScreen::toggleColon() {
 }
 
 void HomeScreen::drawProgressBar() {
-  if (mqSettings->homeScreenProgress == MQSettings::HSP_None) return;
-  bool isVert = mqSettings->homeScreenProgress == MQSettings::HSP_Vertical;
+  if (settings.pbOrientation == HSSettings::PBO_None) return;
+  bool isVert = settings.pbOrientation == HSSettings::PBO_Vertical;
 
   uint8_t whichPrinter;
   String completionTime;
@@ -128,6 +141,43 @@ void HomeScreen::drawProgressBar() {
       Display.mtx->drawFastHLine(0, Display.height()-1, pctPixels, Theme::Color_WHITE);
     }
   }
+}
+
+/*------------------------------------------------------------------------------
+ *
+ * HSSettings Implementation
+ *
+ *----------------------------------------------------------------------------*/
+
+HSSettings::HSSettings() {
+  maxFileSize = 128;
+  version = 1;
+  init("/HSSettings.json");
+}
+
+void HSSettings::fromJSON(const JsonDocument &doc) {
+  displayTime = doc["displayTime"];
+  String pboAsString = doc["pbOrientation"];
+  pbOrientation = PBO_None;
+  if (pboAsString.equalsIgnoreCase("hortizontal")) pbOrientation = PBO_Horizontal;
+  else if (pboAsString.equalsIgnoreCase("vertical")) pbOrientation = PBO_Vertical;
+}
+
+void HSSettings::toJSON(JsonDocument &doc) {
+  doc["displayTime"] = displayTime;
+  switch (pbOrientation) {
+    case PBO_Horizontal: doc["pbOrientation"] = "Horizontal"; break;
+    case PBO_Vertical: doc["pbOrientation"] = "Vertical"; break;
+    default: doc["pbOrientation"] = "None"; break;
+  }
+}
+
+void HSSettings::logSettings() {
+  Log.verbose(F("HomeScreen Settings"));
+  Log.verbose(F("  displayTime: %d"), displayTime);
+  Log.verbose(F("  Progress Bar Orientation: %s"), 
+      pbOrientation == PBO_Horizontal ? "Horizontal" :
+      (pbOrientation == PBO_Vertical ? "Vertical" : "None"));
 }
 
 #endif

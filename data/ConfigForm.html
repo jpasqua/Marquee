@@ -12,11 +12,11 @@
   <b>General Settings</b><br>
   <div class='w3-card-2 w3-round-large'>
     <div class='w3-container w3-margin-bottom'>
-      <p><label>Display home screen for (seconds):</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='homeScreenTime' value='%HS_TIME%' maxlength='5' onkeypress='return isNumberKey(event)'></p>
       <p><label>Frame Delay (ms):</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='scrollDelay' value='%SCROLL_DELAY%' maxlength='10'></p>
     </div>
   </div>
 
+<!-- This will be used in the future when publishing to AIO is supported
   <b>Adafruit IO</b><br>
   <div class='w3-card-2 w3-round-large'>
     <div class='w3-container w3-margin-bottom'>
@@ -27,6 +27,9 @@
         </div>
     </div>
   </div>
+-->
+  <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
+</form>
 
 <style type="text/css">
   .sortItem { border-style: solid; border-width: 1px; margin:1px; padding:4px; float: left; }
@@ -38,7 +41,38 @@
   }
 </style>
 
-<b>Weather Screen Fields</b><br>
+<div class='w3-container'>
+
+<b>Home Screen</b><br>
+<div class='w3-card-2 w3-round-large'>
+  <div class='w3-container w3-margin-bottom w3-padding'>
+    <table>
+      <tr>
+        <td valign='middle'>Display for (seconds):</td>
+        <td>
+          <input class='w3-input w3-border' type='text' id='HS_DISP_TIME'
+                 value='20' maxlength='5' onkeypress='return isNumberKey(event)'>
+        </td>
+      </tr>
+      <tr id="HS_PB_SLCTR">
+        <td>Progress Bar:</td>
+        <td>
+          <select id="PBO_SLCTR" class='w3-option'>
+            <option value='Horizontal' %HSP_HRZ%>Horizontal</option>
+            <option value='Vertical' %HSP_VRT%>Vertical</option>
+            <option value='None' %HSP_NONE%>None</option>
+          </select>
+        </td>
+      </tr>
+    </table>
+    <div class="w3-row">
+      <input type="button" value='Save' onclick="handleHSSave()">
+      &nbsp;<span id='HSResultArea' class='w3-margin-left' style='font-style: italic;'></span>
+    </div>
+  </div>
+</div>
+
+<b>Weather Screen</b><br>
 <div class="w3-card-2 w3-round-large">
   <div class="w3-container w3-margin-bottom w3-padding">
       Select the fields you'd like to see and drag them into your preferred order
@@ -52,7 +86,7 @@
     </div>
   </div>
 
-<b>Forecast Screen Fields</b><br>
+<b>Forecast Screen</b><br>
 <div class="w3-card-2 w3-round-large">
   <div class="w3-container w3-margin-bottom w3-padding">
       Select/Arrange the heading, and the fields for each day
@@ -77,8 +111,39 @@
     </div>
   </div>
 
+<b>Next Printer Screen</b><br>
+<div class="w3-card-2 w3-round-large">
+  <div class="w3-container w3-margin-bottom w3-padding">
+      Select the fields you'd like to see and drag them into your preferred order
+      <div id="npFields" class="w3-margin-bottom">
+      </div>
+      <div class="w3-row w3-padding"></div>
+      <div class="w3-row">
+        <input type="button" value='Save' onclick="handleNPSave()">
+        &nbsp;<span id='NPResultArea' class='w3-margin-left' style='font-style: italic;'></span>
+      </div>
+    </div>
+  </div>
+
+<b>All Printers Screen</b><br>
+<div class="w3-card-2 w3-round-large">
+  <div class="w3-container w3-margin-bottom w3-padding">
+      Select the fields you'd like to see and drag them into your preferred order
+      <div id="apFields" class="w3-margin-bottom">
+      </div>
+      <div class="w3-row w3-padding"></div>
+      <div class="w3-row">
+        <input type="button" value='Save' onclick="handleAPSave()">
+        &nbsp;<span id='APResultArea' class='w3-margin-left' style='font-style: italic;'></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
 <script>
   function showResult(status, data, resultArea) {
+    console.log(data)
     $(resultArea).attr('style', 'color:' + (status ? 'green' : 'red'));
     $(resultArea).html((status ? 'Success' : 'Error') + ': ' + data);
     setTimeout(function() {
@@ -101,7 +166,7 @@
 
   function doSubmit(payload, saveAction, resultArea) {
     $(resultArea).attr('style', 'color: #808080');
-    $(resultArea).html("Updating weather fields...");
+    $(resultArea).html("Updating screen settings...");
     $.ajax({
         // url: 'https://httpbin.org/get',
         url: saveAction,
@@ -118,7 +183,7 @@
   function handleWeatherSave() {
     var theSettings = { fields: getList('#weatherFields') };
     doSubmit(theSettings, "/updateWSSettings", "#WSResultArea");
-    console.log(resultList);
+    console.log(theSettings);
   }
 
   function handleForecastSave() {
@@ -127,8 +192,28 @@
       fields: getList('#fcstFields'),
       label: $('#fcstLabel').val()
     };
-    console.log(theSettings);
     doSubmit(theSettings, "/updateFSSettings", "#FSResultArea");
+    console.log(theSettings);
+  }
+
+  function handleNPSave() {
+    var theSettings = { fields: getList('#npFields') };
+    doSubmit(theSettings, "/updateNPSSettings", "#NPResultArea");
+    console.log(theSettings);
+  }
+
+  function handleAPSave() {
+    var theSettings = { fields: getList('#apFields') };
+    doSubmit(theSettings, "/updateAPSSettings", "#APResultArea");
+    console.log(theSettings);
+  }
+
+  function handleHSSave() {
+    var theSettings = {  };
+    theSettings.displayTime = parseInt($("#HS_DISP_TIME").val(), 10);
+    theSettings.pbOrientation = $('#PBO_SLCTR').val();
+    doSubmit(theSettings, "/updateHSSettings", "#HSResultArea");
+    console.log(theSettings);
   }
 
   function createList(fields, onElement) {
@@ -143,16 +228,31 @@
           );
       }
   }
-  var weatherSequence = JSON.parse('%WS_SETTINGS%');
-  createList(weatherSequence.fields, '#weatherFields');
+
+  var printMonitorEnabled = %PM_ENABLED%;
+  var hsSettings = JSON.parse('%HS_SETTINGS%');
+  $("#HS_PB_SLCTR").css("display", printMonitorEnabled ? "table-row" : "none");
+  $('#PBO_SLCTR').val(hsSettings.pbOrientation);
+  $("#HS_DISP_TIME").val(hsSettings.displayTime);
+
+  var wsSettings = JSON.parse('%WS_SETTINGS%');
+  createList(wsSettings.fields, '#weatherFields');
   new Sortable(weatherFields, { animation: 150, ghostClass: 'ghost' });
 
-  var fcstSettings = JSON.parse('%FS_SETTINGS%');
-
-  createList(fcstSettings.heading, '#fcstHeadFields');
+  var fsSettings = JSON.parse('%FS_SETTINGS%');
+  createList(fsSettings.heading, '#fcstHeadFields');
   new Sortable(fcstHeadFields, { animation: 150, ghostClass: 'ghost' });
 
-  createList(fcstSettings.fields, '#fcstFields');
+  createList(fsSettings.fields, '#fcstFields');
   new Sortable(fcstFields, { animation: 150, ghostClass: 'ghost' });
-  $('#fcstLabel').val(fcstSettings.label);
+  $('#fcstLabel').val(fsSettings.label);
+
+  var npsSettings = JSON.parse('%NPS_SETTINGS%');
+  createList(npsSettings.fields, '#npFields');
+  new Sortable(npFields, { animation: 150, ghostClass: 'ghost' });
+
+  var apsSettings = JSON.parse('%APS_SETTINGS%');
+  createList(apsSettings.fields, '#apFields');
+  new Sortable(apFields, { animation: 150, ghostClass: 'ghost' });
+
 </script>

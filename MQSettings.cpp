@@ -26,7 +26,6 @@ MQSettings::MQSettings() {
 void MQSettings::fromJSON(const JsonDocument &doc) {
   // ----- General Marquee Settings
   scrollDelay = doc["scrollDelay"] | 20;
-  homeScreenTime = doc["homeScreenTime"] | 20;
 
   // ----- Adafruit IO
   aio.username = String(doc["aioUsername"]|"");
@@ -45,16 +44,6 @@ void MQSettings::fromJSON(const JsonDocument &doc) {
     if (i == MaxPrinters) break;
   }
 
-  JsonObjectConst singlePrinterFields = doc["singlePrinter"];
-  singlePrinter.fromJSON(singlePrinterFields);
-  JsonObjectConst allPrintersFields = doc["allPrinters"];
-  allPrinters.fromJSON(allPrintersFields);
-
-  String hspType = doc["hsp"];
-  homeScreenProgress = HSP_None;
-  if (hspType.equalsIgnoreCase("hortizontal")) homeScreenProgress = HSP_Horizontal;
-  else if (hspType.equalsIgnoreCase("vertical")) homeScreenProgress = HSP_Vertical;
-
   // ----- WTApp Settings
   WTAppSettings::fromJSON(doc);
   logSettings();
@@ -63,7 +52,6 @@ void MQSettings::fromJSON(const JsonDocument &doc) {
 void MQSettings::toJSON(JsonDocument &doc) {
   // ----- General Marquee Settings
   doc[F("scrollDelay")] = scrollDelay;
-  doc[F("homeScreenTime")] = homeScreenTime;
 
   // ----- Adafruit IO
   doc["aioUsername"] = aio.username;
@@ -78,17 +66,6 @@ void MQSettings::toJSON(JsonDocument &doc) {
     printer[i].toJSON(printerSettings.createNestedObject());
   }
 
-  JsonObject singleprinterObj = doc.createNestedObject("singlePrinter");
-  singlePrinter.toJSON(singleprinterObj);
-  JsonObject allPrintersObj = doc.createNestedObject("allPrinters");
-  allPrinters.toJSON(allPrintersObj);
-
-  switch (homeScreenProgress) {
-    case HSP_Horizontal: doc["hsp"] = "Hortizontal"; break;
-    case HSP_Vertical: doc["hsp"] = "Hortizontal"; break;
-    default: doc["hsp"] = "None"; break;
-  }
-
   // ----- WTApp Settings
   WTAppSettings::toJSON(doc);
 }
@@ -97,7 +74,6 @@ void MQSettings::logSettings() {
   Log.verbose(F("Marquee Settings"));
   Log.verbose(F("  General Settings"));
   Log.verbose(F("    scrollDelay = %d"), scrollDelay);
-  Log.verbose(F("    homeScreenTime = %d"), homeScreenTime);
   Log.verbose(F("  Adafruit IO Settings"));
   Log.verbose(F("    aio.username = %s"), aio.username.c_str());
   Log.verbose(F("    aio.key = %s"), aio.key.c_str());
@@ -105,13 +81,6 @@ void MQSettings::logSettings() {
   Log.verbose(F("  Print Monitor Settings"));
   Log.verbose(F("    Enabled: %T"), printMonitorEnabled);
   Log.verbose(F("    Refresh interval: %d"), printerRefreshInterval);
-  Log.verbose(F("    Home Screen Progress: %s"), 
-      homeScreenProgress == HSP_Horizontal ? "Horizontal" :
-      (homeScreenProgress == HSP_Vertical ? "Vertical" : "None"));
-  Log.verbose(F("    Single-Printer Display Fields"));
-  singlePrinter.logSettings();
-  Log.verbose(F("    All-Printers Display Fields"));
-  allPrinters.logSettings();
   Log.verbose(F("    Printer Configuration"));
   for (int i = 0; i < MaxPrinters; i++) {
     Log.verbose(F("  Printer Settings %d"), i);
@@ -119,25 +88,4 @@ void MQSettings::logSettings() {
   }
 
   WTAppSettings::logSettings();
-}
-
-void PrinterFields::fromJSON(JsonObjectConst &obj) {
-  printerName = obj["printerName"]|true;
-  fileName = obj["fileName"]|true;
-  pct = obj["pct"]|true;
-  completeAt = obj["completeAt"]|true;
-}
-
-void PrinterFields::toJSON(JsonObject &obj) {
-  obj["printerName"] = printerName;
-  obj["fileName"] = fileName;
-  obj["pct"] = pct;
-  obj["completeAt"] = completeAt;
-}
-
-void PrinterFields::logSettings() {
-  Log.verbose(F("      printer name: %T"), printerName);
-  Log.verbose(F("      file name: %T"), fileName);
-  Log.verbose(F("      pct: %T"), pct);
-  Log.verbose(F("      completeAt: %T"), completeAt);
 }

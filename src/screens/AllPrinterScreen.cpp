@@ -27,6 +27,16 @@
  *----------------------------------------------------------------------------*/
 
 AllPrinterScreen::AllPrinterScreen() {
+  settings.read();
+
+  if (settings.fields.size() == 0) {
+    settings.fields.emplace_back(APSSettings::Field("Printer Name", true));
+    settings.fields.emplace_back(APSSettings::Field("File Name", true));
+    settings.fields.emplace_back(APSSettings::Field("Percentage", true));
+    settings.fields.emplace_back(APSSettings::Field("Completion Time", false));
+    settings.write();
+  }
+
   nLabels = 0;
   labels = NULL;
 
@@ -36,6 +46,10 @@ AllPrinterScreen::AllPrinterScreen() {
 
 void AllPrinterScreen::innerActivation() {
   updateText();
+}
+
+void AllPrinterScreen::settingsHaveChanged() {
+  settings.write();
 }
 
 
@@ -64,24 +78,29 @@ void AllPrinterScreen::updateText() {
 
           if (!_statusText.isEmpty()) _statusText += ", ";
 
-          if (mqSettings->allPrinters.printerName) {
-            _statusText += printerName;
-            _statusText += ": ";
-          }
-          if (mqSettings->allPrinters.pct) {
-            _statusText += pctComplete;
-            _statusText += "% ";
-          }
-          if (mqSettings->allPrinters.fileName) {
-            _statusText += fileName;
-            _statusText += " ";
-          }
-          if (mqSettings->allPrinters.completeAt) {
-            if (timeLeft) {
-              mqApp->printerGroup->completionTime(completionTime, timeLeft);
-              _statusText += completionTime;
+          String delim = "";
+          for (APSSettings::Field f : settings.fields) {
+            if (!f.enabled) continue;
+            _statusText += delim;
+            delim = " ";
+            String key = f.id;
+            key.toLowerCase();
+            if (key.startsWith("printer")) {
+              _statusText += printerName;
+              delim = ":";
+            } else if (key.startsWith("file")) {
+              _statusText += fileName;
+            } else if (key.startsWith("percent")) {
+              _statusText += pctComplete;
+              _statusText += "%";
+            } else if (key.startsWith("completion")) {
+              if (timeLeft) {
+                mqApp->printerGroup->completionTime(completionTime, timeLeft);
+                _statusText += completionTime;
+              }
             }
           }
+
           int len = _statusText.length();
           if (len && _statusText[len-1] == ' ') _statusText.remove(len-1, 1);
         }
@@ -90,6 +109,49 @@ void AllPrinterScreen::updateText() {
   }
   setText(_statusText, Display.BuiltInFont_ID);
 }
+
+/*------------------------------------------------------------------------------
+ *
+ * APSSettings Implementation
+ *
+ *----------------------------------------------------------------------------*/
+
+APSSettings::APSSettings() {
+  maxFileSize = 512;
+  version = 1;
+  init("/APSSettings.json");
+}
+
+void APSSettings::fromJSON(const JsonDocument &doc) {
+  fields.clear();
+
+  Field field;
+
+  const JsonArrayConst& jsonFields = doc["fields"].as<JsonArray>();
+  for (const auto& jsonField : jsonFields) {
+     field.enabled = jsonField["on"];
+     field.id = jsonField["id"].as<String>();
+     fields.push_back(field);
+  }
+}
+
+void APSSettings::toJSON(JsonDocument &doc) {
+  JsonArray jsonFields = doc.createNestedArray("fields");
+  for (Field& field : fields) {
+    JsonObject jsonField = jsonFields.createNestedObject();
+    jsonField["id"] = field.id;
+    jsonField["on"] = field.enabled;
+  }
+}
+
+void APSSettings::logSettings() {
+  Log.verbose(F("AllPrinterScreen Settings"));
+  Log.verbose(F("  Fields"));
+  for (const Field& field : fields) {
+    Log.verbose(F("    %s, enabled: %T"), field.id.c_str(), field.enabled);
+  }
+}
+
 #endif
 
 

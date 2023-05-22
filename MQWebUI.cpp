@@ -63,7 +63,6 @@ namespace MQWebUI {
     void presentMQconfig() {
       auto mapper =[&](const String &key, String& val) -> void {
         if (key == "SCROLL_DELAY")    val = mqSettings->scrollDelay;
-        else if (key == "HS_TIME")    val = mqSettings->homeScreenTime;
 
         else if (key == "AIO_KEY")    val = mqSettings->aio.key;
         else if (key == "AIO_USER")   val = mqSettings->aio.username;
@@ -71,17 +70,18 @@ namespace MQWebUI {
 
         else if (key.equals(F("WS_SETTINGS"))) wtAppImpl->screens.weatherScreen->settings.toJSON(val);
         else if (key.equals(F("FS_SETTINGS"))) wtAppImpl->screens.forecastScreen->settings.toJSON(val);
+        else if (key.equals(F("HS_SETTINGS"))) mqApp->homeScreen->settings.toJSON(val);
+        else if (key.equals(F("APS_SETTINGS"))) mqApp->allPrinterScreen->settings.toJSON(val);
+        else if (key.equals(F("NPS_SETTINGS"))) mqApp->nextPrinterScreen->settings.toJSON(val);
+
+        else if (key.equals("PM_ENABLED")) val = mqSettings->printMonitorEnabled;
       };
 
       WebUI::wrapWebPage("/presentMQconfig", "/ConfigForm.html", mapper);
     }
 
     void presentPrinterConfig() {
-      String hspType = 
-        mqSettings->homeScreenProgress == MQSettings::HSP_Horizontal ? "HSP_HRZ" :
-        (mqSettings->homeScreenProgress == MQSettings::HSP_Vertical ? "HSP_VRT" : "HSP_NONE");
-
-      auto mapper =[hspType](const String& key, String& val) -> void {
+      auto mapper =[](const String& key, String& val) -> void {
         if (key.startsWith("_P")) {
           int i = (key.charAt(2) - '0');
           PrinterSettings* printer = &(mqSettings->printer[i]);
@@ -100,15 +100,6 @@ namespace MQWebUI {
             if (strcmp(subkey, printer->type.c_str()) == 0) val = "selected";
           } 
         }
-        else if (key.equals(hspType)) val = "selected";
-        else if (key.equals("SP_PNAME")) val = WebUIHelper::checkedOrNot[mqSettings->singlePrinter.printerName];
-        else if (key.equals("SP_FNAME")) val = WebUIHelper::checkedOrNot[mqSettings->singlePrinter.fileName];
-        else if (key.equals("SP_PCT")) val = WebUIHelper::checkedOrNot[mqSettings->singlePrinter.pct];
-        else if (key.equals("SP_CMPLT")) val = WebUIHelper::checkedOrNot[mqSettings->singlePrinter.completeAt];
-        else if (key.equals("AP_PNAME")) val = WebUIHelper::checkedOrNot[mqSettings->allPrinters.printerName];
-        else if (key.equals("AP_FNAME")) val = WebUIHelper::checkedOrNot[mqSettings->allPrinters.fileName];
-        else if (key.equals("AP_PCT")) val = WebUIHelper::checkedOrNot[mqSettings->allPrinters.pct];
-        else if (key.equals("AP_CMPLT")) val = WebUIHelper::checkedOrNot[mqSettings->allPrinters.completeAt];
         else if (key.equals("PM_ENABLED")) val = WebUIHelper::checkedOrNot[mqSettings->printMonitorEnabled];
         else if (key.equals("SHOW_DEV")) val = WebThing::settings.showDevMenu ? "true" : "false";
           // SHOW_DEV seems odd to have here, but it's needed to control whether the 
@@ -135,52 +126,55 @@ namespace MQWebUI {
       WebUI::wrapWebAction("/debugScreen", action, false);
     }
 
-    void updateWSSettings() {
-      auto action = []() {
+    void updateSettingsForScreen(
+        Screen* screen, SettingsOwner* so, const char* actionName) {
+      auto action = [&]() {
         // We are handling an HTTP POST with a JSON payload. There isn't a specific function
         // to get the payload from the request, instead ask for the arg named "plain"
         String newSettings = WebUI::arg("plain");
         if (newSettings.isEmpty()) {
-         WebUI::sendStringContent("text/plain", "WeatherScreen settings are empty", "400 Bad Request");
+          WebUI::sendStringContent("text/plain", "Settings are empty", "400 Bad Request");
           return;
         }
-        wtAppImpl->screens.weatherScreen->settings.fromJSON(newSettings);
-        wtAppImpl->screens.weatherScreen->settingsHaveChanged();
-        WebUI::sendStringContent("text/plain", "New WeatherScreen settings were saved");
+        so->getSettings()->fromJSON(newSettings);
+        so->settingsHaveChanged();
+        WebUI::sendStringContent("text/plain", "New settings were saved");
       };
-      
-      WebUI::wrapWebAction("/updateWSSettings", action);
-      if (ScreenMgr.curScreen() == wtAppImpl->screens.weatherScreen) {
+
+      WebUI::wrapWebAction(actionName, action);
+      if (ScreenMgr.curScreen() == screen) {
         ScreenMgr.moveThroughSequence(true);
-        // If we happen to be in the middle of the WeatherScreen we  
+        // If we happen to be in the middle of the current screen we  
         // move to the next screen to avoid confusion of the fields changing.
         // Do this after wrapWebAction so the newly displayed screen doesn't end
         // up having the ActivityIcon restored from the previous screen.
       }
+
+    }
+
+    void updateWSSettings() {
+      updateSettingsForScreen(
+          wtAppImpl->screens.weatherScreen, wtAppImpl->screens.weatherScreen, "/updateWSSettings");
     }
 
     void updateFSSettings() {
-      auto action = []() {
-        // We are handling an HTTP POST with a JSON payload. There isn't a specific function
-        // to get the payload from the request, instead ask for the arg named "plain"
-        String newSettings = WebUI::arg("plain");
-        if (newSettings.isEmpty()) {
-         WebUI::sendStringContent("text/plain", "ForecastScreen settings are empty", "400 Bad Request");
-          return;
-        }
-        wtAppImpl->screens.forecastScreen->settings.fromJSON(newSettings);
-        wtAppImpl->screens.forecastScreen->settingsHaveChanged();
-        WebUI::sendStringContent("text/plain", "New ForecasetScreen settings were saved");
-      };
-      
-      WebUI::wrapWebAction("/updateFSSettings", action);
-      if (ScreenMgr.curScreen() == wtAppImpl->screens.forecastScreen) {
-        ScreenMgr.moveThroughSequence(true);
-        // If we happen to be in the middle of the forecast screen we  
-        // move to the next screen to avoid confusion of the fields changing.
-        // Do this after wrapWebAction so the newly displayed screen doesn't end
-        // up having the ActivityIcon restored from the previous screen.
-      }
+      updateSettingsForScreen(
+          wtAppImpl->screens.forecastScreen, wtAppImpl->screens.forecastScreen, "/updateFSSettings");
+    }
+
+    void updateNPSSettings() {
+      updateSettingsForScreen(
+          mqApp->nextPrinterScreen, mqApp->nextPrinterScreen, "/updateNPSSettings");
+    }
+
+    void updateAPSSettings() {
+      updateSettingsForScreen(
+          mqApp->allPrinterScreen, mqApp->allPrinterScreen, "/updateAPSSettings");
+    }
+
+    void updateHSSettings() {
+      updateSettingsForScreen(
+          mqApp->homeScreen, mqApp->homeScreen, "/updateHSSettings");
     }
 
     // Handler for the "/updatePHConfig" endpoint. This is invoked as the target
@@ -197,7 +191,6 @@ namespace MQWebUI {
       auto action = []() {
         // General Settings
         mqSettings->scrollDelay = WebUI::arg("scrollDelay").toInt();
-        mqSettings->homeScreenTime = WebUI::arg("homeScreenTime").toInt();
         
         // AIO Settings
         mqSettings->aio.key = WebUI::arg("aioKey");
@@ -227,11 +220,6 @@ namespace MQWebUI {
         mqSettings->printerRefreshInterval = WebUI::arg(F("refreshInterval")).toInt();
         mqSettings->printMonitorEnabled = WebUI::hasArg(F("pmEnabled"));
 
-        String hspType = WebUI::arg(F("hsp"));
-        if (hspType.equalsIgnoreCase("horizontal")) mqSettings->homeScreenProgress = MQSettings::HSP_Horizontal;
-        else if (hspType.equalsIgnoreCase("vertical")) mqSettings->homeScreenProgress = MQSettings::HSP_Vertical;
-        else mqSettings->homeScreenProgress = MQSettings::HSP_None;
-
         if (WebThing::settings.showDevMenu) {
           PrinterSettings* printer = &(mqSettings->printer[0]);
           printer[0].mock = WebUI::hasArg(F("_p0_mock"));
@@ -239,15 +227,6 @@ namespace MQWebUI {
           printer[2].mock = WebUI::hasArg(F("_p2_mock"));
           printer[3].mock = WebUI::hasArg(F("_p3_mock"));
         }
-
-        mqSettings->singlePrinter.printerName = WebUI::hasArg("spPrinterName");
-        mqSettings->singlePrinter.fileName = WebUI::hasArg("spFileName");
-        mqSettings->singlePrinter.pct = WebUI::hasArg("spPct");
-        mqSettings->singlePrinter.completeAt = WebUI::hasArg("spCompleteAt");
-        mqSettings->allPrinters.printerName = WebUI::hasArg("apPrinterName");
-        mqSettings->allPrinters.fileName = WebUI::hasArg("apFileName");
-        mqSettings->allPrinters.pct = WebUI::hasArg("apPct");
-        mqSettings->allPrinters.completeAt = WebUI::hasArg("apCompleteAt");
 
         // Act on changed settings...
         if (mqSettings->printMonitorEnabled && !printMonitoringAlreadyEnabled) {
@@ -271,8 +250,11 @@ namespace MQWebUI {
     WebUI::registerHandler("/presentPrinterConfig",   Pages::presentPrinterConfig);
     WebUI::registerHandler("/presentMOTDPage",        Pages::presentMOTDPage);
 
+    WebUI::registerHandler("/updateHSSettings",       Endpoints::updateHSSettings);
     WebUI::registerHandler("/updateWSSettings",       Endpoints::updateWSSettings);
     WebUI::registerHandler("/updateFSSettings",       Endpoints::updateFSSettings);
+    WebUI::registerHandler("/updateNPSSettings",      Endpoints::updateNPSSettings);
+    WebUI::registerHandler("/updateAPSSettings",      Endpoints::updateAPSSettings);
     WebUI::registerHandler("/updatePrinterConfig",    Endpoints::updatePrinterConfig);
     WebUI::registerHandler("/updateMQConfig",         Endpoints::updateMQConfig);
 

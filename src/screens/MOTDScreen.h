@@ -15,8 +15,11 @@
 //                                  Third Party Libraries
 #include <ArduinoLog.h>
 #include <BPABasics.h>
+//                                  WebThing Includes
+#include <BaseSettings.h>
 //                                  WebThingApp Includes
 #include <screens/matrix/ScrollScreen.h>
+#include <screens/matrix/SettingsOwner.h>
 //                                  Local Includes
 //--------------- End:    Includes ---------------------------------------------
 
@@ -32,35 +35,42 @@ struct DayMessages {
   std::vector<String> msgs;
 };
 
-class Messages {
+class Messages : public BaseSettings {
 public:
+  // Ensures that other variants of fromJSON() / toJSON aren't hidden
+  // See: https://isocpp.org/wiki/faq/strange-inheritance#hiding-rule
+  using BaseSettings::fromJSON;
+  using BaseSettings::toJSON;
+
+  // Must override these functions of BaseSettings
+  virtual void fromJSON(const JsonDocument& doc) override;
+  virtual void toJSON(JsonDocument& doc) override;
+
+  // May override these functions of BaseSettings
+  virtual void logSettings() override;
+
   std::vector<TimeMessages> timeMsgs;
   std::vector<DayMessages> dayMsgs;
   std::vector<String> daysOfTheWeek[7];
   uint8_t dotwCount = 10;
-
-  void fromJSON(DynamicJsonDocument& doc);
-  void toLog();
 };
 
 
 
-class MOTDScreen : public ScrollScreen {
+class MOTDScreen : public ScrollScreen, public SettingsOwner {
 public:
   static constexpr size_t MaxDocSize = 8192;
   
   MOTDScreen();
   virtual void innerActivation() override;
+  virtual void settingsHaveChanged() {};
+  virtual BaseSettings* getSettings() { return &msgs; }
 
 private:
-  bool firstActivation = true;
   Messages msgs;
   uint16_t counter = 0;
 
-  void readMessages(String filePath);
-
   void updateText();
-
 };
 
 #endif  // MOTDScreen_h
