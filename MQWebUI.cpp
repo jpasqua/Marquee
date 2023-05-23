@@ -29,7 +29,7 @@ namespace MQWebUI {
       "<a class='w3-bar-item w3-button' href='/presentMQConfig'>"
       "<i class='fa fa-cog'></i> Configure Marquee</a>"
       "<a class='w3-bar-item w3-button' href='/presentScreenConfig'>"
-      "<i class='fa fa-window-restore'></i> Configure Screens</a>"
+      "<i class='fa fa-window-restore'></i> Select Screens</a>"
       "<a class='w3-bar-item w3-button' href='/presentPrinterConfig'>"
       "<i class='fa fa-glass'></i> Configure Printers</a>"
       "<a class='w3-bar-item w3-button' href='/uploadPage?targetName=/motd.json'>"
