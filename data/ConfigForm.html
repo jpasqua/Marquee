@@ -8,27 +8,34 @@
   function isNumberKey(e) { var h = e.which ? e.which : event.keyCode; return !(h > 31 && (h < 48 || h > 57)) }
 </script>
 
-<form class='w3-container' action='/updateMQConfig' method='get'>
-  <b>General Settings</b><br>
+<form class="w3-container" action='/updateMQConfig' method='get'>
+  <div><b>General Settings</b></div>
   <div class='w3-card-2 w3-round-large'>
     <div class='w3-container w3-margin-bottom'>
-      <p><label>Frame Delay (ms):</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='scrollDelay' value='%SCROLL_DELAY%' maxlength='10'></p>
-    </div>
-  </div>
-
-<!-- This will be used in the future when publishing to AIO is supported
-  <b>Adafruit IO</b><br>
-  <div class='w3-card-2 w3-round-large'>
-    <div class='w3-container w3-margin-bottom'>
-        <div class='w3-row'>
-          <p><label>Username</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioUsername' value='%AIO_USER%' maxlength='60'></p>
-          <p><label>Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioKey' value='%AIO_KEY%' maxlength='60'></p>
-          <p><label>Group</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioGroup' value='%AIO_GROUP%' maxlength='60'></p>
+      <table>
+        <tr>
+          <td valign='middle'><label>Frame Delay:</label></td>
+          <td>
+            <input class='w3-input w3-border' type='text' name='scrollDelay' value='%SCROLL_DELAY%' maxlength='10'>
+          </td>
+          <td valign="middle">&nbsp;milliseconds</td>
+        </tr>
+      </table>
+      <!-- This will be used in the future when publishing to AIO is supported
+      <b>Adafruit IO</b><br>
+      <div class='w3-card-2 w3-round-large'>
+        <div class='w3-container w3-margin-bottom'>
+          <div class='w3-row'>
+            <p><label>Username</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioUsername' value='%AIO_USER%' maxlength='60'></p>
+            <p><label>Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioKey' value='%AIO_KEY%' maxlength='60'></p>
+            <p><label>Group</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioGroup' value='%AIO_GROUP%' maxlength='60'></p>
+          </div>
         </div>
+      </div>
+      -->
+      <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
     </div>
   </div>
--->
-  <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
 </form>
 
 <style type="text/css">
@@ -43,16 +50,17 @@
 
 <div class='w3-container'>
 
-<b>Home Screen</b><br>
+<div><b>Home Screen</b></div>
 <div class='w3-card-2 w3-round-large'>
   <div class='w3-container w3-margin-bottom w3-padding'>
     <table>
       <tr>
-        <td valign='middle'>Display for (seconds):</td>
+        <td valign='middle'>Display for: </td>
         <td>
           <input class='w3-input w3-border' type='text' id='HS_DISP_TIME'
                  value='20' maxlength='5' onkeypress='return isNumberKey(event)'>
         </td>
+        <td>&nbsp;seconds</td>
       </tr>
       <tr id="HS_PB_SLCTR">
         <td>Progress Bar:</td>
@@ -65,28 +73,22 @@
         </td>
       </tr>
     </table>
-    <div class="w3-row">
-      <input type="button" value='Save' onclick="handleHSSave()">
-      &nbsp;<span id='HSResultArea' class='w3-margin-left' style='font-style: italic;'></span>
-    </div>
+    <button class='w3-button w3-block w3-round-large w3-grey' type='submit' onclick="handleHSSave()">Save&nbsp;<span id='HSResultArea' class='w3-margin-left' style='font-style: italic;'></span></button>
   </div>
 </div>
 
-<b>Weather Screen</b><br>
+<div><b>Weather Screen</b></div>
 <div class="w3-card-2 w3-round-large">
   <div class="w3-container w3-margin-bottom w3-padding">
       Select the fields you'd like to see and drag them into your preferred order
       <div id="weatherFields" class="w3-margin-bottom">
       </div>
       <div class="w3-row w3-padding"></div>
-      <div class="w3-row">
-        <input type="button" value='Save' onclick="handleWeatherSave()">
-        &nbsp;<span id='WSResultArea' class='w3-margin-left' style='font-style: italic;'></span>
-      </div>
+      <button class='w3-button w3-block w3-round-large w3-grey' type='submit' onclick="handleWSSave()">Save&nbsp;<span id='WSResultArea' class='w3-margin-left' style='font-style: italic;'></span></button>
     </div>
   </div>
 
-<b>Forecast Screen</b><br>
+<div><b>Forecast Screen</b></div>
 <div class="w3-card-2 w3-round-large">
   <div class="w3-container w3-margin-bottom w3-padding">
       Select/Arrange the heading, and the fields for each day
@@ -100,42 +102,35 @@
       </div>
 
       <div class="w3-row">
-        <label>Label:&nbsp;</label>
-        <input class='w3-input w3-border w3-margin-bottom' type='text' id='fcstLabel' name='fcstLabel' value='100' maxlength='60'>
+        <table> <tr>
+          <td valign='middle'>  <label>Label:&nbsp;</label> </td>
+          <td> <input class='w3-input w3-border' type='text' id='fcstLabel' name='fcstLabel' value='100' maxlength='60'> </td>
+        </tr> </table>
       </div>
 
-      <div class="w3-row">
-        <input type="button" value='Save' onclick="handleForecastSave();" >
-        &nbsp;<span id='FSResultArea' class='w3-margin-left' style='font-style: italic;'></span>
-      </div>
+      <button class='w3-button w3-block w3-round-large w3-grey' type='submit' onclick="handleFSSave()">Save&nbsp;<span id='FSResultArea' class='w3-margin-left' style='font-style: italic;'></span></button>
     </div>
   </div>
 
-<b>Next Printer Screen</b><br>
+<div><b>Next Printer Screen</b></div>
 <div class="w3-card-2 w3-round-large">
   <div class="w3-container w3-margin-bottom w3-padding">
       Select the fields you'd like to see and drag them into your preferred order
       <div id="npFields" class="w3-margin-bottom">
       </div>
       <div class="w3-row w3-padding"></div>
-      <div class="w3-row">
-        <input type="button" value='Save' onclick="handleNPSave()">
-        &nbsp;<span id='NPResultArea' class='w3-margin-left' style='font-style: italic;'></span>
-      </div>
+      <button class='w3-button w3-block w3-round-large w3-grey' type='submit' onclick="handleNPSave()">Save&nbsp;<span id='NPResultArea' class='w3-margin-left' style='font-style: italic;'></span></button>
     </div>
   </div>
 
-<b>All Printers Screen</b><br>
+<div><b>All Printers Screen</b></div>
 <div class="w3-card-2 w3-round-large">
   <div class="w3-container w3-margin-bottom w3-padding">
       Select the fields you'd like to see and drag them into your preferred order
       <div id="apFields" class="w3-margin-bottom">
       </div>
       <div class="w3-row w3-padding"></div>
-      <div class="w3-row">
-        <input type="button" value='Save' onclick="handleAPSave()">
-        &nbsp;<span id='APResultArea' class='w3-margin-left' style='font-style: italic;'></span>
-      </div>
+      <button class='w3-button w3-block w3-round-large w3-grey' type='submit' onclick="handleAPSave()">Save&nbsp;<span id='APResultArea' class='w3-margin-left' style='font-style: italic;'></span></button>
     </div>
   </div>
 
@@ -180,13 +175,13 @@
 
   }
 
-  function handleWeatherSave() {
+  function handleWSSave() {
     var theSettings = { fields: getList('#weatherFields') };
     doSubmit(theSettings, "/updateWSSettings", "#WSResultArea");
     console.log(theSettings);
   }
 
-  function handleForecastSave() {
+  function handleFSSave() {
     var theSettings = {
       heading: getList('#fcstHeadFields'),
       fields: getList('#fcstFields'),
