@@ -29,7 +29,7 @@
 #define Config_ESP32Mini     2
 
 // SECTION 4: [CUSTOMIZE] Choose a specific configuration
-#define SelectedConfig Config_ESP32Mini
+#define SelectedConfig Config_D1Mini
 
 // SECTION 5: The definitions of the available configurations
 // Add new configs below if you add an option
