@@ -106,6 +106,7 @@ namespace MQWebUI {
         else if (key.equals(F("HS_SETTINGS"))) mqApp->homeScreen->settings.toJSON(val);
         else if (key.equals(F("APS_SETTINGS"))) mqApp->allPrinterScreen->settings.toJSON(val);
         else if (key.equals(F("NPS_SETTINGS"))) mqApp->nextPrinterScreen->settings.toJSON(val);
+        else if (key.equals(F("NS_SETTINGS"))) mqApp->newsScreen->settings.toJSON(val);
 
         else if (key.equals("PM_ENABLED")) val = mqSettings->printMonitorEnabled;
       };
@@ -200,6 +201,11 @@ namespace MQWebUI {
           mqApp->nextPrinterScreen, mqApp->nextPrinterScreen, "/updateNPSSettings");
     }
 
+    void updateNSSettings() {
+      updateSettingsForScreen(
+          mqApp->newsScreen, mqApp->newsScreen, "/updateNSSettings");
+    }
+
     void updateAPSSettings() {
       updateSettingsForScreen(
           mqApp->allPrinterScreen, mqApp->allPrinterScreen, "/updateAPSSettings");
@@ -288,6 +294,7 @@ namespace MQWebUI {
     WebUI::registerHandler("/updateFSSettings",       Endpoints::updateFSSettings);
     WebUI::registerHandler("/updateNPSSettings",      Endpoints::updateNPSSettings);
     WebUI::registerHandler("/updateAPSSettings",      Endpoints::updateAPSSettings);
+    WebUI::registerHandler("/updateNSSettings",       Endpoints::updateNSSettings);
     WebUI::registerHandler("/updatePrinterConfig",    Endpoints::updatePrinterConfig);
     WebUI::registerHandler("/updateMQConfig",         Endpoints::updateMQConfig);
 

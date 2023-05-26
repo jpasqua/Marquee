@@ -165,12 +165,14 @@ Screen* MarqueeApp::app_registerScreens() {
   nextPrinterScreen = new NextPrinterScreen();
   allPrinterScreen = new AllPrinterScreen();
   motdScreen = new MOTDScreen();
+  newsScreen = new NewsScreen();
   
   ScreenMgr.registerScreen("Splash", splashScreen, true);
   ScreenMgr.registerScreen("Home", homeScreen);
   ScreenMgr.registerScreen("NextPrint", nextPrinterScreen);
   ScreenMgr.registerScreen("AllPrints", allPrinterScreen);
   ScreenMgr.registerScreen("MOTD", motdScreen);
+  ScreenMgr.registerScreen("News", newsScreen);
   ScreenMgr.setAsHomeScreen(homeScreen);
 
   // CUSTOM: Associate a confirm/cancel buttons with the reboot screen
