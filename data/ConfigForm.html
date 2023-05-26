@@ -134,6 +134,66 @@
     </div>
   </div>
 
+  <div><b>News Screen</b></div>
+  <div class="w3-card-2 w3-round-large">
+    <div class="w3-container w3-margin-bottom w3-padding">
+      <label>News <a href='https://newsapi.org/' target='_BLANK'>API Key</a></label>
+      <input class='w3-input w3-border w3-margin-bottom' type='text' value='%NEWSKEY%' id="newsAPIKey" maxlength='60'>
+      <div class='w3-half'>
+        Filter by language:
+        <select class='w3-option w3-padding' id='newslang'>
+          <option value="any">Any</option>
+          <option value="en">English</option>
+          <option value="ar">Arabic</option>
+          <option value="zh">Chinese</option>
+          <option value="nl">Dutch</option>
+          <option value="fr">French</option>
+          <option value="de">German</option>
+          <option value="he">Hebrew</option>
+          <option value="it">Italian</option>
+          <option value="se">Northern Sami</option>
+          <option value="no">Norwegian</option>
+          <option value="pt">Portuguese</option>
+          <option value="ru">Russian</option>
+          <option value="es">Spanish</option>
+          <option value="ud">Urdu</option>
+        </select>
+      </div>
+      <div class='w3-half'>
+        Filter by Country:
+        <select class='w3-option w3-padding' id='newscountry'>
+          <option value="any">Any</option>
+          <option value="us">USA</option>
+          <option value="ar">Argentina</option>
+          <option value="au">Australia</option>
+          <option value="br">Brazil</option>
+          <option value="ca">Canada</option>
+          <option value="zh">China</option>
+          <option value="de">Germany</option>
+          <option value="fr">France</option>
+          <option value="gb">Great Britain</option>
+          <option value="ie">Ireland</option>
+          <option value="in">India</option>
+          <option value="is">Iceland</option>
+          <option value="it">Italy</option>
+          <option value="nl">Netherlands</option>
+          <option value="no">Norway</option>
+          <option value="pk">Pakistan</option>
+          <option value="ru">Russia</option>
+          <option value="sa">Saudi Arabia</option>
+          <option value="za">South Africa</option>
+          <option value="es">Spain</option>
+          <option value="se">Sweden</option>
+        </select>
+      </div>
+      <div class='w3-row'>News Source
+        <select class='w3-option w3-padding' name='newssource' id='newssource'>
+        </select>
+      </div>
+      <button class='w3-button w3-block w3-round-large w3-grey w3-margin-top' type='submit' onclick="handleNSSave()">Save&nbsp;<span id='NSResultArea' class='w3-margin-left' style='font-style: italic;'></span></button>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -211,6 +271,16 @@
     console.log(theSettings);
   }
 
+  function handleNSSave() {
+    var theSettings = {  };
+    theSettings.apiKey = $("#newsAPIKey").val();
+    theSettings.source = $("#newssource").val();
+    theSettings.lang = $("#newslang").val();
+    theSettings.country = $("#newscountry").val();
+    doSubmit(theSettings, "/updateNSSettings", "#NSResultArea");
+    console.log(theSettings);
+  }
+
   function createList(fields, onElement) {
     for(var i = 0; i < fields.length; i++) {
         var field = fields[i];
@@ -222,6 +292,48 @@
           "</div>"
           );
       }
+  }
+
+  var newsSources = null;
+
+  function fillNewsOptions(settings) {
+    var lang = $("#newslang").val();
+    var country = $("#newscountry").val();
+
+    $('#newssource').empty();
+    newsSources.sources.forEach(addOption);
+    $('#newssource').val(settings.source);
+    if ($('#newssource').val() == null) { $("#newssource")[0].selectedIndex = 0; }
+
+    function addOption(it) {
+      var newOption;
+      if (it == null) return;
+      if ((lang === "any" || it.language === lang) &&
+         (country === "any" || it.country === country)) {
+        newOption = '<option>'+it.id+'</option>';
+        $('#newssource').append(newOption);
+      }
+    }
+  }
+
+  function prepNewsScreenFields(settings) {
+    $("#newsAPIKey").val(settings.apikey);
+    $("#newslang").val(settings.lang);
+    $("#newscountry").val(settings.country);
+    if (newsSources === null) {
+      var xmlhttp = new XMLHttpRequest();
+    
+      xmlhttp.open('GET','https://raw.githubusercontent.com/Qrome/marquee-scroller/master/sources.json');
+      xmlhttp.onreadystatechange=function(){
+        if(xmlhttp.readyState==4){
+          if(xmlhttp.status==200){
+            newsSources = JSON.parse(xmlhttp.responseText);
+            fillNewsOptions(settings);
+          }
+        }
+      };
+      xmlhttp.send();
+    }
   }
 
   var printMonitorEnabled = %PM_ENABLED%;
@@ -249,5 +361,10 @@
   var apsSettings = JSON.parse('%APS_SETTINGS%');
   createList(apsSettings.fields, '#apFields');
   new Sortable(apFields, { animation: 150, ghostClass: 'ghost' });
+
+  var nsSettings = JSON.parse('%NS_SETTINGS%');
+  prepNewsScreenFields(nsSettings);
+  $('#newslang').on('change', function() { fillNewsOptions(nsSettings); });
+  $('#newscountry').on('change', function() { fillNewsOptions(nsSettings); });
 
 </script>
