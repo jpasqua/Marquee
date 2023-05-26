@@ -12,8 +12,6 @@
 //                                  Core Libraries
 //                                  Third Party Libraries
 #include <ArduinoJson.h>
-#include <ESP_FS.h>
-#include <GenericESP.h>
 //                                  WebThingApp Includes
 #include <gui/Display.h>
 //                                  Local Includes
@@ -86,6 +84,13 @@ Log.verbose("Using time interval messages");
  * Implementation of the Messages Class
  *
  *----------------------------------------------------------------------------*/
+
+Messages::Messages() {
+  maxFileSize = 8192;
+  version = 1;
+  init("/motd.json");
+}
+
 
 void Messages::fromJSON(const JsonDocument& doc) {
   int currentYear = year();

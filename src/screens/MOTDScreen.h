@@ -37,6 +37,8 @@ struct DayMessages {
 
 class Messages : public BaseSettings {
 public:
+  Messages();
+  
   // Ensures that other variants of fromJSON() / toJSON aren't hidden
   // See: https://isocpp.org/wiki/faq/strange-inheritance#hiding-rule
   using BaseSettings::fromJSON;
