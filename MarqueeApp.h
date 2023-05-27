@@ -38,6 +38,7 @@
 #include "src/screens/AllPrinterScreen.h"
 #include "src/screens/MOTDScreen.h"
 #include "src/screens/NewsScreen.h"
+#include "src/clients/NewsClient.h"
 //--------------- End:    Includes ---------------------------------------------
 
 
@@ -64,6 +65,7 @@ public:
 
   // CUSTOM: Data defined by this app which is available to the whole app
   PrinterGroup*   printerGroup;
+  NewsClient*     newsClient;
 
   // ----- Functions that *must* be provided by subclasses
   virtual void app_registerDataSuppliers() override;

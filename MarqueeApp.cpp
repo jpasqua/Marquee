@@ -144,6 +144,7 @@ void MarqueeApp::app_initClients() {
   // CUSTOM: If your app has any app-specific clients, initilize them now
 
   fireUpPrintMonitor();
+  newsClient = new NewsClient(newsScreen->settings.source, newsScreen->settings.apiKey);
 
   // ScreenMgr.showActivityIcon(Theme::Color_WHITE);
   // Perform potentially long running actions here...
@@ -155,6 +156,14 @@ void MarqueeApp::app_conditionalUpdate(bool force) {
 
   if (mqSettings->printMonitorEnabled) {
     printerGroup->refreshPrinterData(force);
+  }
+
+  static uint32_t lastNewsUpdate = 0;
+  if (force || (millis() > (lastNewsUpdate + Basics::minutesToMS(newsScreen->settings.refreshInterval)))) {
+    Log.verbose("Updating news");
+    newsClient->update();
+    newsClient->dump();
+    lastNewsUpdate = millis();
   }
 }
 
