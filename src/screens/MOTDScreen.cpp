@@ -137,7 +137,7 @@ void Messages::fromJSON(const JsonDocument& doc) {
   dotwCount = doc["dotwCount"];
 }
 
-void Messages::toJSON(JsonDocument& doc) {
+void Messages::toJSON(JsonDocument&) {
   // TO DO: Implement if ever needed. Right now we just upload entire MOTD.json files
 }
 
