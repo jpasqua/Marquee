@@ -15,6 +15,7 @@
 //                                  WebThingApp Includes
 #include <gui/Display.h>
 //                                  Local Includes
+#include "../../MarqueeApp.h"
 #include "NewsScreen.h"
 //--------------- End:    Includes ---------------------------------------------
 
@@ -31,6 +32,7 @@ NewsScreen::NewsScreen() {
   settings.lang = "any";
   settings.source = "abc-news";
   settings.apiKey = "";
+  settings.refreshInterval = 15;
 
   settings.read();  // If no file exists, one will be created with dflt settings
 
@@ -55,7 +57,13 @@ void NewsScreen::settingsHaveChanged() {
 //
 
 void NewsScreen::updateText() {
-  String text = "Source: " + settings.source + " (" + settings.lang + ", " + settings.country + ")";
+  String text = "";
+  if (mqApp->newsClient) {
+      text += settings.source;
+      if (curStory >= mqApp->newsClient->stories.size()) curStory = 0;
+      text += ": ";
+      text += mqApp->newsClient->stories[curStory++].title;
+  }
   setText(text, Display.BuiltInFont_ID);
 }
 
@@ -76,6 +84,8 @@ void NSSettings::fromJSON(const JsonDocument& doc) {
   country = doc["country"].as<String>();
   source = doc["source"].as<String>();
   apiKey = doc["apiKey"].as<String>();
+  refreshInterval = doc["refreshInterval"];
+  if (refreshInterval == 0) refreshInterval = 15;
 }
 
 void NSSettings::toJSON(JsonDocument& doc) {
@@ -83,6 +93,7 @@ void NSSettings::toJSON(JsonDocument& doc) {
   doc["country"] = country;
   doc["source"] = source;
   doc["apiKey"] = apiKey;
+  doc["refreshInterval"] = refreshInterval;
 }
 
 void NSSettings::logSettings() {
@@ -91,6 +102,7 @@ void NSSettings::logSettings() {
   Log.verbose("  country filter: %s", country.c_str());
   Log.verbose("  news source: %s", source.c_str());
   Log.verbose("  API Key: %s", apiKey.c_str());
+  Log.verbose("  Refresh Interval: %s", refreshInterval);
 }
 
 #endif
