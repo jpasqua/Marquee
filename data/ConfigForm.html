@@ -137,9 +137,16 @@
   <div><b>News Screen</b></div>
   <div class="w3-card-2 w3-round-large">
     <div class="w3-container w3-margin-bottom w3-padding">
-      <label>News <a href='https://newsapi.org/' target='_BLANK'>API Key</a></label>
-      <input class='w3-input w3-border w3-margin-bottom' type='text' value='%NEWSKEY%'
-      value="" id="newsAPIKey" maxlength='60'>
+      <div class='w3-row'>
+        <label>News <a href='https://newsapi.org/' target='_BLANK'>API Key</a></label>
+        <input class='w3-input w3-border w3-margin-bottom' type='text'
+        value="" id="newsAPIKey" maxlength='60'>
+      </div>
+      <div class=w3-row>
+        <label>Refresh Interval (minutes)</label>
+        <input class='w3-input w3-border w3-margin-bottom' type='text'
+        value="" id="newsRefresh" maxlength='60'>
+      </div>
       <div class='w3-half'>
         Filter by language:
         <select class='w3-option w3-padding' id='newslang'>
@@ -278,6 +285,7 @@
     theSettings.source = $("#newssource").val();
     theSettings.lang = $("#newslang").val();
     theSettings.country = $("#newscountry").val();
+    theSettings.refreshInterval = $("#newsRefresh").val();
     doSubmit(theSettings, "/updateNSSettings", "#NSResultArea");
     console.log(theSettings);
   }
@@ -321,6 +329,7 @@
     $("#newsAPIKey").val(settings.apiKey);
     $("#newslang").val(settings.lang);
     $("#newscountry").val(settings.country);
+    $("#newsRefresh").val(settings.refreshInterval);
     if (newsSources === null) {
       var xmlhttp = new XMLHttpRequest();
     

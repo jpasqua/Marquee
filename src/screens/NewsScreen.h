@@ -42,6 +42,7 @@ public:
   String country;
   String source;
   String apiKey;
+  uint32_t refreshInterval;
 };
 
 class NewsScreen : public ScrollScreen, public SettingsOwner {
@@ -55,6 +56,8 @@ public:
 
 private:
   void updateText();
+
+  size_t curStory = 0;
 };
 
 #endif  // NewsScreen_h
