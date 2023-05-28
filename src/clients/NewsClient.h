@@ -20,6 +20,7 @@ public:
   };
 
   NewsClient(String& source, String& key);
+  void updateSettings(String& source, String& key);
   bool update();
   void dump();
 

@@ -18,10 +18,18 @@ static constexpr uint16_t NewsPort = 80;
 
 static JSONService newsService(ServiceDetails(NewsServer, NewsPort));
 
-NewsClient::NewsClient(String& source, String& key) :
-    _source(source), _key(key)
-{
+NewsClient::NewsClient(String& source, String& key) {
+  updateSettings(source, key);
   _endpoint.reserve(132);
+}
+
+void NewsClient::updateSettings(String& source, String& key) {
+  _source = source;
+  _key = key;
+  _endpoint ="/v2/top-headlines?sources=";
+  _endpoint.concat(_source);
+  _endpoint.concat("&apiKey=");
+  _endpoint.concat(_key);
 }
 
 char *makeAHole(size_t holeSize) {
@@ -42,8 +50,7 @@ char *makeAHole(size_t holeSize) {
 }
 
 bool NewsClient::update() {
-  _endpoint ="/v2/top-headlines?sources="; _endpoint.concat(_source);
-  _endpoint.concat("&apiKey="); _endpoint.concat(_key);
+  if (_source.isEmpty() || _key.isEmpty()) return false;
 
   StaticJsonDocument<128> filter;
   filter["articles"][0]["title"] = true;
