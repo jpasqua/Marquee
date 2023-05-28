@@ -47,6 +47,7 @@ void NewsScreen::innerActivation() {
 }
 
 void NewsScreen::settingsHaveChanged() {
+  mqApp->newsClient->updateSettings(settings.source, settings.apiKey);
   updateText();
   settings.write();
 }
@@ -59,10 +60,12 @@ void NewsScreen::settingsHaveChanged() {
 void NewsScreen::updateText() {
   String text = "";
   if (mqApp->newsClient) {
-      text += settings.source;
-      if (curStory >= mqApp->newsClient->stories.size()) curStory = 0;
-      text += ": ";
-      text += mqApp->newsClient->stories[curStory++].title;
+      if (mqApp->newsClient->stories.size() != 0) {
+        text += settings.source;
+        if (curStory >= mqApp->newsClient->stories.size()) curStory = 0;
+        text += ": ";
+        text += mqApp->newsClient->stories[curStory++].title;
+      }
   }
   setText(text, Display.BuiltInFont_ID);
 }
