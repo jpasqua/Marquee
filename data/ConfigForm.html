@@ -16,7 +16,7 @@
         <tr>
           <td valign='middle'><label>Frame Delay:</label></td>
           <td>
-            <input class='w3-input w3-border' type='text' name='scrollDelay' value='%SCROLL_DELAY%' maxlength='10'>
+            <input class='w3-border' type='text' name='scrollDelay' value='%SCROLL_DELAY%' maxlength='10'>
           </td>
           <td valign="middle">&nbsp;milliseconds</td>
         </tr>
@@ -26,9 +26,9 @@
       <div class='w3-card-2 w3-round-large'>
         <div class='w3-container w3-margin-bottom'>
           <div class='w3-row'>
-            <p><label>Username</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioUsername' value='%AIO_USER%' maxlength='60'></p>
-            <p><label>Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioKey' value='%AIO_KEY%' maxlength='60'></p>
-            <p><label>Group</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioGroup' value='%AIO_GROUP%' maxlength='60'></p>
+            <p><label>Username</label><input class='w3-border w3-margin-bottom' type='text' name='aioUsername' value='%AIO_USER%' maxlength='60'></p>
+            <p><label>Key</label><input class='w3-border w3-margin-bottom' type='text' name='aioKey' value='%AIO_KEY%' maxlength='60'></p>
+            <p><label>Group</label><input class='w3-border w3-margin-bottom' type='text' name='aioGroup' value='%AIO_GROUP%' maxlength='60'></p>
           </div>
         </div>
       </div>
@@ -57,7 +57,7 @@
       <tr>
         <td valign='middle'>Display for: </td>
         <td>
-          <input class='w3-input w3-border' type='text' id='HS_DISP_TIME'
+          <input class='w3-border' type='text' id='HS_DISP_TIME'
                  value='20' maxlength='5' onkeypress='return isNumberKey(event)'>
         </td>
         <td>&nbsp;seconds</td>
@@ -104,7 +104,7 @@
       <div class="w3-row">
         <table> <tr>
           <td valign='middle'>  <label>Label:&nbsp;</label> </td>
-          <td> <input class='w3-input w3-border' type='text' id='fcstLabel' name='fcstLabel' value='100' maxlength='60'> </td>
+          <td> <input class='w3-border' type='text' id='fcstLabel' name='fcstLabel' value='100' maxlength='60'> </td>
         </tr> </table>
       </div>
 
@@ -138,16 +138,25 @@
   <div class="w3-card-2 w3-round-large">
     <div class="w3-container w3-margin-bottom w3-padding">
       <div class='w3-row'>
+        <input type='checkbox' id='newsEnabled' style="vertical-align: middle">
+        <label>&nbsp;News Enabled&nbsp;</label>
+      </div>
+      <div class='w3-row'>
         <label>News <a href='https://newsapi.org/' target='_BLANK'>API Key</a></label>
-        <input class='w3-input w3-border w3-margin-bottom' type='text'
-        value="" id="newsAPIKey" maxlength='60'>
+        <input class='w3-border' type='text' value="" id="newsAPIKey" size='40'>
       </div>
-      <div class=w3-row>
-        <label>Refresh Interval (minutes)</label>
-        <input class='w3-input w3-border w3-margin-bottom' type='text'
-        value="" id="newsRefresh" maxlength='60'>
+      <div class='w3-row'>
+        <table>
+          <tr>
+            <td valign='middle'><label>Refresh Interval:&nbsp;</label></td>
+            <td>
+              <input class='w3-border' type='text' value="" id="newsRefresh" size='5'>
+            </td>
+            <td valign="middle">&nbsp;minutes</td>
+          </tr>
+        </table>
       </div>
-      <div class='w3-half'>
+      <div class='w3-third'>
         Filter by language:
         <select class='w3-option w3-padding' id='newslang'>
           <option value="any">Any</option>
@@ -167,7 +176,7 @@
           <option value="ud">Urdu</option>
         </select>
       </div>
-      <div class='w3-half'>
+      <div class='w3-third'>
         Filter by Country:
         <select class='w3-option w3-padding' id='newscountry'>
           <option value="any">Any</option>
@@ -194,7 +203,7 @@
           <option value="se">Sweden</option>
         </select>
       </div>
-      <div class='w3-row'>News Source
+      <div class='w3-third w3-margin-bottom'>News Source:&nbsp;
         <select class='w3-option w3-padding' name='newssource' id='newssource'>
         </select>
       </div>
@@ -206,7 +215,6 @@
 
 <script>
   function showResult(status, data, resultArea) {
-    console.log(data)
     $(resultArea).attr('style', 'color:' + (status ? 'green' : 'red'));
     $(resultArea).html((status ? 'Success' : 'Error') + ': ' + data);
     setTimeout(function() {
@@ -228,6 +236,7 @@
   }
 
   function doSubmit(payload, saveAction, resultArea) {
+    console.log(payload);
     $(resultArea).attr('style', 'color: #808080');
     $(resultArea).html("Updating screen settings...");
     $.ajax({
@@ -246,7 +255,6 @@
   function handleWSSave() {
     var theSettings = { fields: getList('#weatherFields') };
     doSubmit(theSettings, "/updateWSSettings", "#WSResultArea");
-    console.log(theSettings);
   }
 
   function handleFSSave() {
@@ -256,19 +264,16 @@
       label: $('#fcstLabel').val()
     };
     doSubmit(theSettings, "/updateFSSettings", "#FSResultArea");
-    console.log(theSettings);
   }
 
   function handleNPSave() {
     var theSettings = { fields: getList('#npFields') };
     doSubmit(theSettings, "/updateNPSSettings", "#NPResultArea");
-    console.log(theSettings);
   }
 
   function handleAPSave() {
     var theSettings = { fields: getList('#apFields') };
     doSubmit(theSettings, "/updateAPSSettings", "#APResultArea");
-    console.log(theSettings);
   }
 
   function handleHSSave() {
@@ -276,18 +281,17 @@
     theSettings.displayTime = parseInt($("#HS_DISP_TIME").val(), 10);
     theSettings.pbOrientation = $('#PBO_SLCTR').val();
     doSubmit(theSettings, "/updateHSSettings", "#HSResultArea");
-    console.log(theSettings);
   }
 
   function handleNSSave() {
     var theSettings = {  };
+    theSettings.enabled = $("#newsEnabled").is(':checked');
     theSettings.apiKey = $("#newsAPIKey").val();
     theSettings.source = $("#newssource").val();
     theSettings.lang = $("#newslang").val();
     theSettings.country = $("#newscountry").val();
     theSettings.refreshInterval = $("#newsRefresh").val();
     doSubmit(theSettings, "/updateNSSettings", "#NSResultArea");
-    console.log(theSettings);
   }
 
   function createList(fields, onElement) {
@@ -326,6 +330,7 @@
   }
 
   function prepNewsScreenFields(settings) {
+    $("#newsEnabled").prop('checked', settings.enabled);
     $("#newsAPIKey").val(settings.apiKey);
     $("#newslang").val(settings.lang);
     $("#newscountry").val(settings.country);
