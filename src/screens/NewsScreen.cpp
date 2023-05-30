@@ -28,6 +28,7 @@
 
 NewsScreen::NewsScreen() {
   // Default values
+  settings.enabled = true;
   settings.country = "any";
   settings.lang = "any";
   settings.source = "abc-news";
@@ -35,6 +36,8 @@ NewsScreen::NewsScreen() {
   settings.refreshInterval = 15;
 
   settings.read();  // If no file exists, one will be created with dflt settings
+
+  _wasEnabled = settings.enabled;
 
   nLabels = 0;
   labels = NULL;
@@ -48,6 +51,12 @@ void NewsScreen::innerActivation() {
 
 void NewsScreen::settingsHaveChanged() {
   mqApp->newsClient->updateSettings(settings.source, settings.apiKey);
+  if (settings.enabled != _wasEnabled) {
+    if (_wasEnabled == false) {
+      mqApp->app_conditionalUpdate(false);  // Refresh the news
+    }
+    _wasEnabled = settings.enabled;
+  }
   updateText();
   settings.write();
 }
@@ -59,13 +68,15 @@ void NewsScreen::settingsHaveChanged() {
 
 void NewsScreen::updateText() {
   String text = "";
-  if (mqApp->newsClient) {
-      if (mqApp->newsClient->stories.size() != 0) {
-        text += settings.source;
-        if (curStory >= mqApp->newsClient->stories.size()) curStory = 0;
-        text += ": ";
-        text += mqApp->newsClient->stories[curStory++].title;
-      }
+  if (settings.enabled) {
+    if (mqApp->newsClient) {
+        if (mqApp->newsClient->stories.size() != 0) {
+          text += settings.source;
+          if (curStory >= mqApp->newsClient->stories.size()) curStory = 0;
+          text += ": ";
+          text += mqApp->newsClient->stories[curStory++].title;
+        }
+    }
   }
   setText(text, Display.BuiltInFont_ID);
 }
@@ -83,6 +94,7 @@ NSSettings::NSSettings() {
 }
 
 void NSSettings::fromJSON(const JsonDocument& doc) {
+  enabled = doc["enabled"];
   lang = doc["lang"].as<String>();
   country = doc["country"].as<String>();
   source = doc["source"].as<String>();
@@ -92,6 +104,7 @@ void NSSettings::fromJSON(const JsonDocument& doc) {
 }
 
 void NSSettings::toJSON(JsonDocument& doc) {
+  doc["enabled"] = enabled;
   doc["lang"] = lang;
   doc["country"] = country;
   doc["source"] = source;
@@ -101,9 +114,10 @@ void NSSettings::toJSON(JsonDocument& doc) {
 
 void NSSettings::logSettings() {
   Log.verbose("NewsScreen Settings");
-  Log.verbose("  language filter: %s", lang.c_str());
-  Log.verbose("  country filter: %s", country.c_str());
-  Log.verbose("  news source: %s", source.c_str());
+  Log.verbose("  Enabled: %T", enabled);
+  Log.verbose("  Language filter: %s", lang.c_str());
+  Log.verbose("  Country filter: %s", country.c_str());
+  Log.verbose("  News Source: %s", source.c_str());
   Log.verbose("  API Key: %s", apiKey.c_str());
   Log.verbose("  Refresh Interval: %s", refreshInterval);
 }

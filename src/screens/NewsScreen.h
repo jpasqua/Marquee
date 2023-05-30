@@ -38,6 +38,7 @@ public:
   // May override these functions of BaseSettings
   virtual void logSettings() override;
 
+  bool enabled;
   String lang;
   String country;
   String source;
@@ -58,6 +59,7 @@ private:
   void updateText();
 
   size_t curStory = 0;
+  bool _wasEnabled;
 };
 
 #endif  // NewsScreen_h
