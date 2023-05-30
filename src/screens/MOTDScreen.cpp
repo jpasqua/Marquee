@@ -55,7 +55,6 @@ void MOTDScreen::updateText() {
   for (auto d: msgs.dayMsgs) {
     if (d.month == theMonth && d.day == theDay) {
       setText(d.msgs[random(0, d.msgs.size())], Display.BuiltInFont_ID);
-Log.verbose("Using special day messages");
       return;
     }
   }
@@ -64,14 +63,12 @@ Log.verbose("Using special day messages");
     counter = 0;
     std::vector<String>& v = msgs.daysOfTheWeek[weekday()-1];
     setText(v[random(0, v.size())], Display.BuiltInFont_ID);
-Log.verbose("Using dotw messages");
     return;
   }
 
   for (auto t: msgs.timeMsgs) {
     if (theHour >= t.startHour && theHour < t.endHour) {
       setText(t.msgs[random(0, t.msgs.size())], Display.BuiltInFont_ID);
-Log.verbose("Using time interval messages");
       return;
     }
   }
