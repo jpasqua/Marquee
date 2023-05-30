@@ -159,11 +159,13 @@ void MarqueeApp::app_conditionalUpdate(bool force) {
   }
 
   static uint32_t lastNewsUpdate = 0;
-  if (force || (millis() > (lastNewsUpdate + Basics::minutesToMS(newsScreen->settings.refreshInterval)))) {
-    Log.verbose("Updating news");
-    newsClient->update();
-    newsClient->dump();
-    lastNewsUpdate = millis();
+  if (newsScreen->settings.enabled) {
+    if (force || (millis() > (lastNewsUpdate + Basics::minutesToMS(newsScreen->settings.refreshInterval)))) {
+      Log.verbose("Updating news");
+      newsClient->update();
+      newsClient->dump();
+      lastNewsUpdate = millis();
+    }
   }
 }
 
