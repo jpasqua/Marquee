@@ -2,7 +2,7 @@
   "version": 1,
   "enabled":true,
   "username": "jpasqua",
-  "key": "aio_vSSR96uPuqjX4H8FNcrz4FtYQHLQ",
+  "key": "API_KEY",
   "groups": [
     "backyard-weather-station",
     "office-weather-station"
