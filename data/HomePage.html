@@ -21,12 +21,18 @@
 
 <script>
   function fillPrinterFields(printerInfo, onElement) {
-    $(onElement).append(
-          "<div class='w3-cell w3-container'>" +
-          "  <a href='" + printerInfo.url + "'>" + printerInfo.name + "</a>" +
-          "</div>");
+    console.log(printerInfo.pct, printerInfo.pct == 100);
+    if (printerInfo.hasOwnProperty("pct") && printerInfo.pct == 100) {
+      printerInfo.completeAt = "[complete]";
+    }
+    $(onElement).append("<div class='w3-border'></div>");
+    let theContainer = $(onElement).children().last();
+    theContainer.append(
+      "<div class='w3-cell w3-container'>" +
+      "  <a href='" + printerInfo.url + "'>" + printerInfo.name + "</a>" +
+      "</div>");
     if (printerInfo.hasOwnProperty("pct")) {
-      $(onElement).append(
+      $(theContainer).append(
           "<div class='w3-cell w3-container'>" + printerInfo.pct + "\%"+ "</div>" +
           "<div class='w3-cell w3-container'>" +
           "  Time Remaining: " + Math.floor(printerInfo.remaining/60) + "H:" + printerInfo.remaining\%60 + "M" + 
