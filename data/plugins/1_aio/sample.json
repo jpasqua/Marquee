@@ -1,8 +1,8 @@
 {
   "version": 1,
   "enabled":true,
-  "username": "USER",
-  "key": "KEY",
+  "username": "jpasqua",
+  "key": "aio_vSSR96uPuqjX4H8FNcrz4FtYQHLQ",
   "groups": [
     "backyard-weather-station",
     "office-weather-station"
@@ -12,10 +12,10 @@
   "feeds": [
     "0.temp",
     "0.humidity",
-    "0.barometer",
+    "0.aqi",
     "1.temp",
     "1.humidity",
-    "1.barometer"
+    "1.aqi"
    ],
   "riScale": 60000
 }

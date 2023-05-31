@@ -8,7 +8,7 @@
       "key": "NN1"
     },
     {
-      "format": "%0.1fF, ",
+      "format": "%0.0fF, ",
       "type": "FLOAT",
       "key": "0.temp"
     },
@@ -18,9 +18,9 @@
       "key": "0.humidity"
     },
     {
-      "format": "%.2finHg",
+      "format": "AQI:%d",
       "type": "FLOAT",
-      "key": "0.barometer"
+      "key": "0.aqi"
     },
     {
       "format": " | %s ",
@@ -28,7 +28,7 @@
       "key": "NN2"
     },
     {
-      "format": "%0.1fF, ",
+      "format": "%0.0fF, ",
       "type": "FLOAT",
       "key": "1.temp"
     },
@@ -38,9 +38,9 @@
       "key": "1.humidity"
     },
     {
-      "format": "%.2finHg",
-      "type": "FLOAT",
-      "key": "1.barometer"
+      "format": "AQI:%d",
+      "type": "INT",
+      "key": "1.aqi"
     }
   ],
   "bkg": "0x000000",
