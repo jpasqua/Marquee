@@ -21,7 +21,6 @@
 
 <script>
   function fillPrinterFields(printerInfo, onElement) {
-    console.log(printerInfo.pct, printerInfo.pct == 100);
     if (printerInfo.hasOwnProperty("pct") && printerInfo.pct == 100) {
       printerInfo.completeAt = "[complete]";
     }
