@@ -54,8 +54,6 @@ bool NewsClient::update() {
 
   StaticJsonDocument<128> filter;
   filter["articles"][0]["title"] = true;
-  // filter["articles"][0]["description"] = true;
-  // filter["articles"][0]["url"] = true;
 
   char* hole = makeAHole(1024);
   DynamicJsonDocument *doc = newsService.issueGET(_endpoint, 2048, &filter);
@@ -73,8 +71,6 @@ bool NewsClient::update() {
   for (JsonObjectConst article : articles) {
     Story s;
     s.title = article["title"].as<String>();
-    // s.description = article["description"].as<String>();
-    // s.url = article["url"].as<String>();
     stories.push_back(s);
     if (++index == MaxStories) break;
   }
@@ -86,8 +82,6 @@ bool NewsClient::update() {
 void NewsClient::dump() {
   for (Story story : stories) {
     Log.verbose("Title: %s", story.title.c_str());
-    // Log.verbose("Description: %s", story.description.c_str());
-    // Log.verbose("URL: %s", story.url.c_str());
   }
 }
 

@@ -15,8 +15,6 @@ public:
 
   struct Story {
     String title;
-    // String description;
-    // String url;
   };
 
   NewsClient(String& source, String& key);
