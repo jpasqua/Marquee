@@ -31,9 +31,7 @@ namespace MQWebUI {
       "<a class='w3-bar-item w3-button' href='/presentScreenConfig'>"
       "<i class='fa fa-window-restore'></i> Select Screens</a>"
       "<a class='w3-bar-item w3-button' href='/presentPrinterConfig'>"
-      "<i class='fa fa-glass'></i> Configure Printers</a>"
-      "<a class='w3-bar-item w3-button' href='/uploadPage?targetName=/motd.json'>"
-      "<i class='fa fa-commenting'></i> Configure MOTD</a>");
+      "<i class='fa fa-glass'></i> Configure Printers</a>");
 
     void updateSinglePrinter(int i) {
       PrinterSettings* printer = &(mqSettings->printer[i]);
