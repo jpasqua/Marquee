@@ -16,7 +16,8 @@
 <div id="openweathermap-widget-11" class='w3-margin-bottom'></div>
 
 <div id="NEWS_AREA" class='w3-cell-row' style='display:none'>
-  <h2 id="NewsHeading"></h2>
+  <h2 id="NewsHeading" style="display: inline;"></h2>
+  <span id="LoadStories"><small>[Click to load stories]</small></span>
 </div>
 
 <script>
@@ -107,8 +108,12 @@
   }
 
   if (newsSettings.enabled) {
+    $("#NewsHeading").html("Headlines from " + newsSettings.source);
+    $("#LoadStories").click(function() {
+      loadNews(newsSettings);
+      $("#LoadStories").hide();
+    });
     $("#NEWS_AREA").css("display", "block");
-    loadNews(newsSettings);
   }
 
   loadWeatherWidget();
