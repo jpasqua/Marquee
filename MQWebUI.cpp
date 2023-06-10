@@ -53,7 +53,10 @@ namespace MQWebUI {
       auto mapper =[](const String& key, String& val) -> void {
         // ----- Printer-related items
         if (key.equals(F("PM_ENABLED"))) val = mqSettings->printMonitorEnabled;
-        else if (key.equals(F("PRINTER_INFO"))) mqApp->printerGroup->printerInfo(val);
+        else if (key.equals(F("PRINTER_INFO"))) {
+          if (!mqSettings->printMonitorEnabled) { val = "[]"; }
+          else { mqApp->printerGroup->printerInfo(val); }
+        }
 
         // ----- News-related items
         else if (key.equals(F("NS_SETTINGS"))) mqApp->newsScreen->settings.toJSON(val);
