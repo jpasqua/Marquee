@@ -29,8 +29,12 @@
 //                                  Third Party Libraries
 #include <BPA_PrinterGroup.h>
 //                                  WebThing Includes
+#include <WebThing.h>
+#include <sensors/WeatherMgr.h>
+//                                  WebThingApp Includes
 #include <WTAppImpl.h>
 //                                  Local Includes
+#include "src/hardware/HWConfig.h"
 #include "MQSettings.h"
 #include "src/screens/SplashScreen.h"
 #include "src/screens/HomeScreen.h"
@@ -38,6 +42,7 @@
 #include "src/screens/AllPrinterScreen.h"
 #include "src/screens/MOTDScreen.h"
 #include "src/screens/NewsScreen.h"
+#include "src/screens/DateScreen.h"
 #include "src/clients/NewsClient.h"
 //--------------- End:    Includes ---------------------------------------------
 
@@ -62,10 +67,12 @@ public:
   AllPrinterScreen*   allPrinterScreen;
   MOTDScreen*         motdScreen;
   NewsScreen*         newsScreen;
+  DateScreen*         dateScreen;
 
   // CUSTOM: Data defined by this app which is available to the whole app
   PrinterGroup*   printerGroup;
   NewsClient*     newsClient;
+  WeatherMgr      weatherMgr;
 
   // ----- Functions that *must* be provided by subclasses
   virtual void app_registerDataSuppliers() override;
@@ -85,6 +92,7 @@ public:
 
 private:
   void showPrinterActivity(bool busy);
+  void prepAIO();
 
 };
 

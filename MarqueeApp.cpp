@@ -1,16 +1,12 @@
 /*
  * MarqueeApp:
- *    A simple example showing how to use the Matrix display class.
- *
- * CUSTOMIZATION:
- * o To create your own app based on this sample, search for 'CUSTOM'
- *   to find areas that should be changed/customized
- * o Areas labeled 'BOILERPLATE' may require mechanical changes such as updating
- *   the names you have used for classes and variables
+ *    A scrolling Marquee of all sorts of useful (and not) information.
  *
  */
 
 //--------------- Begin:  Includes ---------------------------------------------
+//                                  Hardware Definitions
+#include "src/hardware/HWConfig.h"
 //                                  Core Libraries
 //                                  Third Party Libraries
 #include <ArduinoLog.h>
@@ -18,20 +14,21 @@
 #include <WebThing.h>
 #include <WebUI.h>
 #include <DataBroker.h>
+#include <clients/AIOMgr.h>
+#include <sensors/WeatherUtils.h>
+#include <clients/AIO_WeatherPublisher.h>
+//                                  WebThingApp Includes
 #include <gui/Display.h>
 #include <gui/ScreenMgr.h>
 #include <screens/matrix/ScrollScreen.h>
 #include <plugins/PluginMgr.h>
 #include <plugins/common/GenericPlugin.h>
 #include <plugins/common/AIOPlugin.h>
-#include <plugins/common/CryptoPlugin.h>
 //                                  Local Includes
-#include "src/hardware/HWConfig.h"
 #include "MarqueeApp.h"
 #include "MQSettings.h"
 #include "MQWebUI.h"
 #include "MQDataSupplier.h"
-#include "src/screens/AppTheme.h"
 //--------------- End:    Includes ---------------------------------------------
 
 
@@ -58,7 +55,6 @@ Plugin* pluginFactory(const String& type) {
 
   // CUSTOM: Choose which plugins you'd like to load
   if      (type.equalsIgnoreCase("generic")) { p = new GenericPlugin(); }
-  else if (type.equalsIgnoreCase("crypto"))  { p = new CryptoPlugin();  }
   else if (type.equalsIgnoreCase("aio"))  { p = new AIOPlugin();  }
   
 
@@ -146,13 +142,21 @@ void MarqueeApp::app_initClients() {
   fireUpPrintMonitor();
   newsClient = new NewsClient(newsScreen->settings.source, newsScreen->settings.apiKey);
 
-  // ScreenMgr.showActivityIcon(Theme::Color_WHITE);
-  // Perform potentially long running actions here...
-  // ScreenMgr.hideActivityIcon();
+  ScreenMgr.showActivityIcon(Theme::Color_WHITE);
+  prepAIO();
+  ScreenMgr.hideActivityIcon();
 }
 
 void MarqueeApp::app_conditionalUpdate(bool force) {
   // CUSTOM: Update any app-specific clients
+
+  #if defined(HAS_WEATHER_SENSOR)
+    static bool startingUp = true;
+  
+    weatherMgr.takeReadings(force);
+    if (!startingUp) AIOMgr::publish();
+    startingUp = false;
+  #endif
 
   if (mqSettings->printMonitorEnabled) {
     printerGroup->refreshPrinterData(force);
@@ -177,9 +181,11 @@ Screen* MarqueeApp::app_registerScreens() {
   allPrinterScreen = new AllPrinterScreen();
   motdScreen = new MOTDScreen();
   newsScreen = new NewsScreen();
+  dateScreen = new DateScreen();
   
   ScreenMgr.registerScreen("Splash", splashScreen, true);
   ScreenMgr.registerScreen("Home", homeScreen);
+  ScreenMgr.registerScreen("Date", dateScreen);
   ScreenMgr.registerScreen("NextPrint", nextPrinterScreen);
   ScreenMgr.registerScreen("AllPrints", allPrinterScreen);
   ScreenMgr.registerScreen("MOTD", motdScreen);
@@ -239,6 +245,20 @@ void MarqueeApp::app_configureHW() {
   }
 
   ScreenMgr.setSequenceButtons(hwConfig.advanceButton, hwConfig.previousButton);
+
+  #if defined(HAS_WEATHER_SENSOR)
+    auto weatherBusyCallBack = [this](bool busy) {
+      // if (busy) busyIndicator->setColor(0, 255, 0);
+      // else busyIndicator->off();
+    };
+
+    WeatherUtils::configureAvailableSensors(weatherMgr);
+    weatherMgr.init(
+      mqSettings->sensorSettings.tempCorrection,
+      mqSettings->sensorSettings.humiCorrection,
+      WebThing::settings.elevation,
+      weatherBusyCallBack);
+  #endif
 }
 
 /*------------------------------------------------------------------------------
@@ -246,6 +266,27 @@ void MarqueeApp::app_configureHW() {
  * MarqueeApp Private Functions
  *
  *----------------------------------------------------------------------------*/
+
+void MarqueeApp::prepAIO() {
+  if (mqSettings->aio.username.isEmpty() || mqSettings->aio.key.isEmpty()) {
+    Log.trace("MarqueeApp::prepAIO: AIO username or key is empty");
+    return;
+  }
+
+  auto aioBusyCallBack = [this](bool busy) {
+    if (busy) ScreenMgr.showActivityIcon(Theme::Color_WHITE);
+    else ScreenMgr.hideActivityIcon();
+  };
+
+  AIOMgr::init(mqSettings->aio.username, mqSettings->aio.key);
+  AIOMgr::setBusyCB(aioBusyCallBack);
+  AIOMgr::aio->setDefaultGroup(mqSettings->aio.groupName.c_str());
+
+  // ----- Register the BME Publisher
+  #if defined(HAS_WEATHER_SENSOR)
+    AIOMgr::registerPublisher(new AIO_WeatherPublisher(&weatherMgr));
+  #endif
+}  
 
 void MarqueeApp::showPrinterActivity(bool busy) {
  if (busy) ScreenMgr.showActivityIcon(Theme::Color_WHITE);
