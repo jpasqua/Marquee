@@ -8,6 +8,13 @@
   function isNumberKey(e) { var h = e.which ? e.which : event.keyCode; return !(h > 31 && (h < 48 || h > 57)) }
 </script>
 
+<style>
+  .top-radius-large {
+    border-top-left-radius:8px;
+    border-top-right-radius:8px;
+  }
+</style>
+
 <form class="w3-container" action='/updateMQConfig' method='get'>
   <div><b>General Settings</b></div>
   <div class='w3-card-2 w3-round-large'>
@@ -21,18 +28,38 @@
           <td valign="middle">&nbsp;milliseconds</td>
         </tr>
       </table>
-      <!-- This will be used in the future when publishing to AIO is supported
-      <b>Adafruit IO</b><br>
-      <div class='w3-card-2 w3-round-large'>
+
+      <div id="SensorSettings" style='display:none' >
+      <div id='AIOSettings' class='w3-card-4 w3-margin-top top-radius-large'>
+        <header class='w3-container w3-theme-l4 top-radius-large'>
+          <h4>AdafruitIO Publish Settings</h4>
+        </header>
         <div class='w3-container w3-margin-bottom'>
-          <div class='w3-row'>
-            <p><label>Username</label><input class='w3-border w3-margin-bottom' type='text' name='aioUsername' value='%AIO_USER%' maxlength='60'></p>
-            <p><label>Key</label><input class='w3-border w3-margin-bottom' type='text' name='aioKey' value='%AIO_KEY%' maxlength='60'></p>
-            <p><label>Group</label><input class='w3-border w3-margin-bottom' type='text' name='aioGroup' value='%AIO_GROUP%' maxlength='60'></p>
+          <p><label>Username</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioUsername' value='%AIO_USER%' maxlength='60'></p>
+          <p><label>Key</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioKey' value='%AIO_KEY%' maxlength='60'></p>
+          <p><label>Group</label><input class='w3-input w3-border w3-margin-bottom' type='text' name='aioGroup' value='%AIO_GROUP%' maxlength='60'></p>
+        </div>
+      </div>
+
+      <div class='w3-card-4 w3-margin-top top-radius-large'>
+        <header class='w3-container w3-theme-l4 top-radius-large'>
+          <h4>Sensor Settings</h4>
+        </header>
+        <div class='w3-container w3-margin-bottom'>
+          <div class='w3-row w3-margin-top w3-margin-bottom'>
+            <label>Temperature Correction: </label>
+            <input class='w3-border' type='text' name='tempCorrection' value='%TEMP_CORRECT%' size='6'>
+            <span>&deg;C</span>
+          </div>
+          <div class='w3-row w3-margin-bottom'>
+            <label>Humidity Correction: </label>
+            <input class='w3-border' type='text' name='humiCorrection' value='%HUMI_CORRECT%' size='6'>
+            <span>\%</span>
           </div>
         </div>
       </div>
-      -->
+      </div>
+
       <button class='w3-button w3-block w3-round-large w3-grey w3-section w3-padding' type='submit'>Save</button>
     </div>
   </div>
@@ -142,7 +169,7 @@
         <label>&nbsp;News Enabled&nbsp;</label>
       </div>
       <div class='w3-row'>
-        <label>News <a href='https://newsapi.org/' target='_BLANK'>API Key</a></label>
+        <label>News <a href='https://newsapi.org/' target='_BLANK'>API Key:</a>&nbsp;</label>
         <input class='w3-border' type='text' value="" id="newsAPIKey" size='40'>
       </div>
       <div class='w3-row'>
@@ -360,6 +387,9 @@
   }
 
   var printMonitorEnabled = %PM_ENABLED%;
+  var hasWeather = %HAS_WTHR%;
+
+  showHide('SensorSettings', hasWeather);
   var hsSettings = JSON.parse('%HS_SETTINGS%');
   $("#HS_PB_SLCTR").css("display", printMonitorEnabled ? "table-row" : "none");
   $('#PBO_SLCTR').val(hsSettings.pbOrientation);
