@@ -16,6 +16,7 @@
 #include <gui/Display.h>
 #include <screens/matrix/ScrollScreen.h>
 //                                  Local Includes
+#include "src/hardware/HWConfig.h"
 #include "MarqueeApp.h"
 #include "MQWebUI.h"
 //--------------- End:    Includes ---------------------------------------------
@@ -86,9 +87,18 @@ namespace MQWebUI {
       auto mapper =[&](const String &key, String& val) -> void {
         if (key == "SCROLL_DELAY")    val = mqSettings->scrollDelay;
 
+        if (key == "HAS_WTHR") {
+          #if defined(HAS_WEATHER_SENSOR)
+            val = "true";
+          #else
+            val = "false";
+          #endif
+        }
         else if (key == "AIO_KEY")    val = mqSettings->aio.key;
         else if (key == "AIO_USER")   val = mqSettings->aio.username;
         else if (key == "AIO_GROUP")  val = mqSettings->aio.groupName;
+        else if (key == "TEMP_CORRECT") val = mqSettings->sensorSettings.tempCorrection;
+        else if (key == "HUMI_CORRECT") val = mqSettings->sensorSettings.humiCorrection;
 
         else if (key.equals(F("WS_SETTINGS"))) wtAppImpl->screens.weatherScreen->settings.toJSON(val);
         else if (key.equals(F("FS_SETTINGS"))) wtAppImpl->screens.forecastScreen->settings.toJSON(val);
@@ -224,6 +234,10 @@ namespace MQWebUI {
         mqSettings->aio.key = WebUI::arg("aioKey");
         mqSettings->aio.username = WebUI::arg("aioUsername");
         mqSettings->aio.groupName = WebUI::arg("aioGroup");
+
+        // Sensor Settings
+        mqSettings->sensorSettings.tempCorrection = WebUI::arg("tempCorrection").toFloat();
+        mqSettings->sensorSettings.humiCorrection = WebUI::arg("humiCorrection").toFloat();
 
         mqSettings->write();
 
