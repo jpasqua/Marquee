@@ -3,7 +3,8 @@
 
 #include <BPABasics.h>
 #include <GenericESP.h>
-#include <gui/devices/DeviceSelect.h>
+#include "SensorConfig.h"
+#include <gui/Display.h>  // For DisplayDeviceOptions
 
 //
 // A Hardware configuration is a bundle of definitions that describe a
@@ -19,20 +20,34 @@
 //    your hardware. 
 //
 // This file is specific to hard3are configurations which contain a
-// DEVICE_TYPE_OLED display device. It can be used as a basis for
+// DEVICE_TYPE_MTX display device. It can be used as a basis for
 // HWConfig files with other types of display, or no display
 //
 
-// SECTION 3: [BOILERPLATE] Define a list of the predefined hardware configs
+
+// SECTION 0: [BOILERPLATE] Generic definitions
+#define PRESENT     1
+#define MOCK        2
+
+
+//
+// SECTION 1: [BOILERPLATE] Define a list of the predefined hardware configs
 // that we can choose from. If you add a new configuration, list it here.
+//
 #define Config_D1Mini        1
 #define Config_ESP32Mini     2
 
-// SECTION 4: [CUSTOMIZE] Choose a specific configuration
-#define SelectedConfig Config_D1Mini
 
-// SECTION 5: The definitions of the available configurations
+//
+// SECTION 2: [CUSTOMIZE] Choose a specific configuration
+//
+#define SelectedConfig Config_D1Mini
+#define BME_SENSOR  MOCK
+
+//
+// SECTION 3: The definitions of the available configurations
 // Add new configs below if you add an option
+//
 #if (SelectedConfig == Config_D1Mini)
   /*------------------------------------------------------------------------------
    *
@@ -75,6 +90,27 @@
     #error "Please set SelectedConfig"
 #endif
 
+
+//
+// SECTION 4: Sensor Settings
+//
+
+#if (BME_SENSOR == PRESENT)
+  #define BME280_READINGS (BME280_AVAIL_READINGS)
+  constexpr uint8_t BME_I2C_ADDR = 0x76;
+#elif (BME_SENSOR == MOCK)
+  #define BME280_READINGS (BME280_AVAIL_READINGS)
+  constexpr uint8_t BME_I2C_ADDR = 0x00;
+#else
+  constexpr uint8_t BME_I2C_ADDR = 0x00;
+#endif
+
+#if defined(BME280_READINGS) || defined (DHT22_READINGS) || defined(DS18B20_READINGS)
+  #define HAS_WEATHER_SENSOR
+#endif
+
+// SECTION 4: The structure that defines the configuration based on all the
+// definitions above.
 
 class HWConfig {
 public:
