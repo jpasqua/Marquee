@@ -12,12 +12,22 @@
 #include <Arduino.h>
 //                                  Third Party Libraries
 #include <BPA_PrinterSettings.h>
-//                                  WebThing Includes
+//                                  WebThingApp Includes
 #include <WTAppSettings.h>
 //                                  Local Includes
 #include "MarqueeApp.h"
 //--------------- End:    Includes ---------------------------------------------
 
+
+class SensorSettings : public BaseSerializer {
+public:
+  void fromJSON(const JsonDocument& doc) override;
+  void toJSON(JsonDocument& doc) override;
+  void logSettings() override;
+
+  float   tempCorrection = 0.0; // Correction to the temp reading - always in Celsius
+  float   humiCorrection = 0.0; // Correction to the humidty sensor reading
+};
 
 class MQSettings: public WTAppSettings {
 public:
@@ -39,6 +49,8 @@ public:
   bool printMonitorEnabled = false;
   PrinterSettings printer[MaxPrinters];
   uint32_t printerRefreshInterval = 10;
+
+  SensorSettings sensorSettings;
 
 private:
   // ----- Constants -----

@@ -17,6 +17,30 @@
 //--------------- End:    Includes ---------------------------------------------
 
 
+//
+// ===== SensorSettings =====
+//
+
+void SensorSettings::fromJSON(const JsonDocument &doc) {
+  tempCorrection = doc["sensorSettings"]["tempCorrection"];
+  humiCorrection = doc["sensorSettings"]["humiCorrection"];
+}
+
+void SensorSettings::toJSON(JsonDocument &doc) {
+  doc["sensorSettings"]["tempCorrection"] = tempCorrection;
+  doc["sensorSettings"]["humiCorrection"] = humiCorrection;
+}
+
+void SensorSettings::logSettings() {
+  Log.verbose(F("Sensor Settings"));
+  Log.verbose(F("  tempCorrection: %d"), tempCorrection);
+  Log.verbose(F("  humiCorrection: %d"), humiCorrection);
+}
+
+//
+// ===== MQSettings =====
+//
+
 MQSettings::MQSettings() {
   maxFileSize = 4096;
   version = MQSettings::CurrentVersion;
@@ -44,8 +68,12 @@ void MQSettings::fromJSON(const JsonDocument &doc) {
     if (i == MaxPrinters) break;
   }
 
+  // ----- Sensor Settings
+  sensorSettings.fromJSON(doc);
+
   // ----- WTApp Settings
   WTAppSettings::fromJSON(doc);
+
   logSettings();
 }
 
@@ -65,6 +93,9 @@ void MQSettings::toJSON(JsonDocument &doc) {
   for (int i = 0; i < MaxPrinters; i++) {
     printer[i].toJSON(printerSettings.createNestedObject());
   }
+
+  // ----- Sensor Settings
+  sensorSettings.toJSON(doc);
 
   // ----- WTApp Settings
   WTAppSettings::toJSON(doc);
@@ -86,6 +117,6 @@ void MQSettings::logSettings() {
     Log.verbose(F("  Printer Settings %d"), i);
     printer[i].logSettings();
   }
-
+  sensorSettings.logSettings();
   WTAppSettings::logSettings();
 }
