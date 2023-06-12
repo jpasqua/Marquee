@@ -5,6 +5,7 @@
 //                                  Core Libraries
 #include <Arduino.h>
 //                                  Third Party Libraries
+#include <Output.h>
 #include <TimeLib.h>
 //                                  WebThingApp
 #include <gui/Display.h>
@@ -71,7 +72,12 @@ void HomeScreen::display(bool activating) {
 
   if ((mtx->width() >= 64) && (mqApp->owmClient != nullptr)) {
     constexpr int charWidthIncludingSpace = 6;
-    int temp = mqApp->owmClient->weather.readings.temp; // Rounds the value
+    int temp = 0;
+#if defined(HAS_WEATHER_SENSOR)
+    if (mqApp->weatherMgr.hasTemp()) temp = std::round(Output::temp(mqApp->weatherMgr.getLastReadings().temp));
+#else
+    temp = std::round(mqApp->owmClient->weather.readings.temp);
+#endif
     int nChars = 1; // For the 'C' or 'F'
     nChars += temp < 0 ? 1 : 0; // Add space for the minus sign if needed
     nChars += temp > 99 ? 2 : (temp > 9 ? 2 : 1); // Space for the digits
