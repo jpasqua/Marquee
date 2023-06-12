@@ -1,48 +1,34 @@
 {
-  "items": [
-    {
-      "x": "50",
-      "font": "_5x7",
-      "format": "%s ",
-      "type": "STRING",
-      "key": "NN1"
-    },
-    {
-      "format": "%0.0fF, ",
-      "type": "FLOAT",
-      "key": "0.temp"
-    },
-    {
-      "format": "%.0f%%, ",
-      "type": "FLOAT",
-      "key": "0.humidity"
-    },
-    {
-      "format": "AQI:%d",
-      "type": "INT",
-      "key": "0.aqi"
-    },
-    {
-      "format": " | %s ",
-      "type": "STRING",
-      "key": "NN2"
-    },
-    {
-      "format": "%0.0fF, ",
-      "type": "FLOAT",
-      "key": "1.temp"
-    },
-    {
-      "format": "%.0f%%, ",
-      "type": "FLOAT",
-      "key": "1.humidity"
-    },
-    {
-      "format": "AQI:%d",
-      "type": "INT",
-      "key": "1.aqi"
-    }
-  ],
-  "bkg": "0x000000",
-  "screenID": "AIO_W"
+    "items":
+    [
+        {
+            "x": "50",
+            "font": "_5x7",
+            "format": "%s ",
+            "type": "STRING",
+            "key": "NN1"
+        },
+        {
+            "format": "%0.0fF, ",
+            "type": "FLOAT",
+            "key": "0.temp"
+        },
+        {
+            "format": "%.0f%%, ",
+            "type": "FLOAT",
+            "key": "0.humidity"
+        },
+        {
+            "format": "AQI:%d ",
+            "type": "INT",
+            "key": "0.aqi"
+        },
+        {
+            "format": "%s",
+            "type": "STRING",
+            "key": "$R.aqiDesc_$E.AW.0.aqi"
+        }
+    ],
+    "bkg": "0x000000",
+    "screenID": "AIO_W"
 }
