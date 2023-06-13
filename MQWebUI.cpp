@@ -147,6 +147,36 @@ namespace MQWebUI {
 
   // ----- BEGIN: MQWebUI::Endpoints
   namespace Endpoints {
+
+    void ackPrinterDone() {
+      auto action = [&]() {
+        if (!mqApp->printerGroup) {
+          Log.warning("ackPrinterDone: printerGroup is null");
+          WebUI::sendStringContent("text/plain", "printer index out of range", "400 Bad Request");
+          return;
+        }
+
+        int printerIndex = WebUI::arg("pi").toInt();
+        if (printerIndex < 0 || printerIndex >= mqApp->printerGroup->numberOfPrinters()) {
+          Log.warning("ackPrinterDone: index out of range: %d vs %d",
+            printerIndex, mqApp->printerGroup->numberOfPrinters());
+          WebUI::sendStringContent("text/plain", "printer index out of range", "400 Bad Request");
+          return;
+        }
+
+        auto printer = mqApp->printerGroup->getPrinter(printerIndex);
+        if (printer) {
+          printer->acknowledgeCompletion();
+          WebUI::sendStringContent("text/plain", "Printer Completion Acknowledged");
+        } else {
+          Log.warning("ackPrinterDone: no printer for index %d", printerIndex);
+          WebUI::sendStringContent("text/plain", "printer index out of range", "400 Bad Request");
+        }
+      };
+
+      WebUI::wrapWebAction("/ackPrinterDone", action);
+    }
+
     void debugScreen() {
       auto action = []() {
         Display.mtx->reset();
@@ -300,6 +330,7 @@ namespace MQWebUI {
     WebUI::registerHandler("/updateNSSettings",       Endpoints::updateNSSettings);
     WebUI::registerHandler("/updatePrinterConfig",    Endpoints::updatePrinterConfig);
     WebUI::registerHandler("/updateMQConfig",         Endpoints::updateMQConfig);
+    WebUI::registerHandler("/ackPrinterDone",         Endpoints::ackPrinterDone);
 
     WebUI::registerHandler("/debugScreen",            Endpoints::debugScreen);
   }
