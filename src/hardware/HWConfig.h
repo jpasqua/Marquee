@@ -42,7 +42,7 @@
 // SECTION 2: [CUSTOMIZE] Choose a specific configuration
 //
 #define SelectedConfig Config_D1Mini
-#define BME_SENSOR  MOCK
+// #define BME_SENSOR  MOCK
 
 //
 // SECTION 3: The definitions of the available configurations
