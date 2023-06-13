@@ -19,7 +19,10 @@ public:
     Display.setFont(Display.BuiltInFont_ID);
     mtx->setCursor(0, 0);
     if (mtx->width() >= 64) {
-      mtx->print("Marquee");
+      mtx->print("Starting");
+      mtx->setCursor(46, 0); mtx->print(".");
+      mtx->setCursor(49, 0); mtx->print(".");
+      mtx->setCursor(52, 0); mtx->print(".");
     } else {
       mtx->print("Ready");
     }
