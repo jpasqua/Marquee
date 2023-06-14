@@ -4,6 +4,11 @@
 <style>
   .aligned { display: flex; align-items: center; }
   .aligned > img { margin-right: 10px; }
+  .PRT_INFO::before {
+    content: "\\2022"; /* Unicode value of bullet symbol */
+    float: left;
+    display: "inline-block";
+  }
 </style>
 
 <div id="PRINTER_AREA" class='w3-row' style='display:none'>
@@ -21,25 +26,43 @@
 </div>
 
 <script>
+  function ackPrinter(index) {
+    let xmlhttp = new XMLHttpRequest();
+    let endpoint = '/ackPrinterDone?pi=' + index;
+    xmlhttp.open('GET', endpoint);
+    xmlhttp.onreadystatechange=function(){
+      if (xmlhttp.readyState === 4) {
+        if (xmlhttp.status === 200) { location.reload(); }
+        else { alert('Error processing request'); }
+      }
+    };
+    xmlhttp.send();
+  }
+
   function fillPrinterFields(printerInfo, onElement) {
-    if (printerInfo.hasOwnProperty("pct") && printerInfo.pct == 100) {
-      printerInfo.completeAt = "[complete]";
-    }
-    $(onElement).append("<div class='w3-border'></div>");
+    $(onElement).append("<div class='PRT_INFO'></div>");
     let theContainer = $(onElement).children().last();
-    theContainer.append(
-      "<div class='w3-cell w3-container'>" +
-      "  <a href='" + printerInfo.url + "'>" + printerInfo.name + "</a>" +
-      "</div>");
+    let content = 
+      "<div style='display:inline-block;''><div class='w3-cell w3-container'>" +
+      "  <a href='" + printerInfo.url + "'>" + printerInfo.name + "</a>";
     if (printerInfo.hasOwnProperty("pct")) {
-      $(theContainer).append(
-          "<div class='w3-cell w3-container'>" + printerInfo.pct + "\%"+ "</div>" +
-          "<div class='w3-cell w3-container'>" +
-          "  Time Remaining: " + Math.floor(printerInfo.remaining/60) + "H:" + printerInfo.remaining\%60 + "M" + 
-          "</div> <div class='w3-cell w3-container'>" +
-          "   Complete At: " + printerInfo.completeAt +
-          "</div> <div class='w3-row w3-container'>" + printerInfo.file + "</div>");
+      content += 
+        ": " + printerInfo.pct + "\%"+ "</div>" +
+        "<div class='w3-cell w3-container'>" +
+        "  Time Remaining: " + Math.floor(printerInfo.remaining/60) + "H:" + printerInfo.remaining\%60 + "M" + 
+        "</div>";
+      content += "<div class='PRT_CMPLT w3-cell w3-container'>";
+      if (printerInfo.pct == 100) {
+        content += "<span onclick='ackPrinter(";
+        content += printerInfo.i;
+        content += ");' style='cursor: pointer; color:blue'>Complete</span>";
+      } else content += "Complete At: " + printerInfo.completeAt;
+      content += "</div>";
+      content += "<div class='w3-row w3-container'>" + printerInfo.file + "</div></div>";
+    } else {
+      content += "</div></div>";
     }
+    $(theContainer).append(content);
   }
 
   function fillNews(articles) {
@@ -48,10 +71,8 @@
       onElement.append(
         "<div class='w3-row w3-margin-bottom aligned'>" +
         "  <img src='" + article.urlToImage + "' style='float:left; border: solid 1px;' height='90'/>" +
-        "  <div>" +
-        "    <div><a href='" + article.url + "'>" + article.title + "</a></div>" +
-        "    <div style='line-height: 1.3'>" + article.description + "</div>" +
-        "  </div>" +
+        "  <div><div><a href='" + article.url + "'>" + article.title + "</a></div>" +
+        "  <div style='line-height: 1.3'>" + article.description + "</div></div>" +
         "</div>");
     });
   }
@@ -94,15 +115,12 @@
 
   if (printersEnabled) {
     let printerInfo = JSON.parse('%PRINTER_INFO%');
+    printerInfo.forEach(function(cur, index) { cur.i = index; });
     printerInfo = printerInfo.sort((p1, p2) => 
       (p2.remaining < p1.remaining) ? 1 : (p2.remaining > p1.remaining) ? -1 : 0);
-    var firstPrinterAdded = true;
-    printerInfo.forEach(function(cur) {
-      if (!firstPrinterAdded) {
-         $("#PRINTER_AREA").append("<div style='margin-bottom:10px;'></div>");
-      }
+    printerInfo.forEach(function(cur, index) {
+      if (!cur.hasOwnProperty("name")) return;  // Skip empty (inactive) printers
       fillPrinterFields(cur, "#PRINTER_AREA");
-      firstPrinterAdded = false;
     });
     $("#PRINTER_AREA").css("display", "block");
   }
@@ -116,6 +134,9 @@
     $("#NEWS_AREA").css("display", "block");
   }
 
-  loadWeatherWidget();
+  if ('%WEATHER_KEY%' != '') loadWeatherWidget();
+  else {
+    $("#openweathermap-widget-11").append("<span>OpenWeatherMap has not been configured</span>");
+  }
 
 </script>
