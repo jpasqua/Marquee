@@ -116,8 +116,12 @@
   if (printersEnabled) {
     let printerInfo = JSON.parse('%PRINTER_INFO%');
     printerInfo.forEach(function(cur, index) { cur.i = index; });
-    printerInfo = printerInfo.sort((p1, p2) => 
-      (p2.remaining < p1.remaining) ? 1 : (p2.remaining > p1.remaining) ? -1 : 0);
+    printerInfo = printerInfo.sort((p1, p2) => {
+      if (p1.remaining === undefined && p2.remaining === undefined) return 0;
+      if (p1.remaining === undefined) return 1;
+      if (p2.remaining === undefined) return -1;
+      return (p1.remaining - p2.remaining);
+    });
     printerInfo.forEach(function(cur, index) {
       if (!cur.hasOwnProperty("name")) return;  // Skip empty (inactive) printers
       fillPrinterFields(cur, "#PRINTER_AREA");
