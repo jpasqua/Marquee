@@ -305,7 +305,7 @@ namespace MQWebUI {
           mqApp->fireUpPrintMonitor();
         }
         wtAppImpl->configMayHaveChanged();
-        wtApp->settings->write();
+        mqSettings->write();
         WebUI::redirectHome();
       };
   
