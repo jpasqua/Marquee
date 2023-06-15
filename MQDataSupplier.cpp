@@ -36,7 +36,7 @@ namespace MQDataSupplier {
         else if (aqi < 201) val = "Unhealthy";
         else if (aqi < 301) val = "Harmful";
         else val = "Hazardous";
-      } else val = '--';
+      } else val = "--";
     }
   }
 
