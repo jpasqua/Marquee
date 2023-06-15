@@ -70,11 +70,11 @@ void NewsScreen::updateText() {
   String text = "";
   if (settings.enabled) {
     if (mqApp->newsClient) {
-        if (mqApp->newsClient->stories.size() != 0) {
+        if (mqApp->newsClient->nStories != 0) {
           text += settings.source;
-          if (curStory >= mqApp->newsClient->stories.size()) curStory = 0;
+          if (curStory >= mqApp->newsClient->nStories) curStory = 0;
           text += ": ";
-          text += mqApp->newsClient->stories[curStory++].title;
+          text += mqApp->newsClient->stories[curStory++];
         }
     }
   }

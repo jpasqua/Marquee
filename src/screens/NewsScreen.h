@@ -58,7 +58,7 @@ public:
 private:
   void updateText();
 
-  size_t curStory = 0;
+  int curStory = 0;
   bool _wasEnabled;
 };
 
