@@ -3,7 +3,6 @@
 
 //--------------- Begin:  Includes ---------------------------------------------
 //                                  Core Libraries
-#include <vector>
 //                                  Third Party Libraries
 //                                  Local Includes
 //--------------- End:    Includes ---------------------------------------------
@@ -13,16 +12,13 @@ class NewsClient {
 public:
   static constexpr uint8_t MaxStories = 10;
 
-  struct Story {
-    String title;
-  };
-
   NewsClient(String& source, String& key);
   void updateSettings(String& source, String& key);
   bool update();
   void dump();
 
-  std::vector<Story> stories;
+  String stories[MaxStories];
+  int nStories = 0;
 
 private:
   String _endpoint;
