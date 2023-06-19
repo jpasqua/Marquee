@@ -26,13 +26,13 @@
 struct TimeMessages {
   uint8_t startHour;
   uint8_t endHour;
-  std::vector<String> msgs;
+  std::vector<const char*> msgs;
 };
 
 struct DayMessages {
   uint8_t month;
   uint8_t day;
-  std::vector<String> msgs;
+  std::vector<const char*> msgs;
 };
 
 class Messages : public BaseSettings {
@@ -51,9 +51,11 @@ public:
   // May override these functions of BaseSettings
   virtual void logSettings() override;
 
+  void begin();
+  
   std::vector<TimeMessages> timeMsgs;
   std::vector<DayMessages> dayMsgs;
-  std::vector<String> daysOfTheWeek[7];
+  std::vector<const char*> daysOfTheWeek[7];
   uint8_t dotwCount = 10;
 };
 
@@ -71,6 +73,7 @@ public:
 private:
   Messages msgs;
   uint16_t counter = 0;
+  bool msgsRead = false;
 
   void updateText();
 };
