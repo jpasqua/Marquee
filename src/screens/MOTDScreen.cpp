@@ -50,14 +50,12 @@ void MOTDScreen::updateText() {
   int theDay = day(timeNow);
   int theMonth = month(timeNow);
   int theHour = hour(timeNow);
-Log.verbose("special day: month: %d, day %d", theMonth, theDay);
 
   counter++;
 
   // Check whether we're on a special day
   for (auto d: msgs.dayMsgs) {
     if (d.month == theMonth && d.day == theDay) {
-Log.verbose("special day: month: %d, day %d", d.month, d.day);
       setText(d.msgs[random(0, d.msgs.size())], Display.BuiltInFont_ID);
       return;
     }
@@ -92,31 +90,24 @@ void Messages::begin() {
   maxFileSize = 8192;
   version = 1;
   init("/motd.json");
-
-Log.verbose(F("\nBefore MOTD: Heap: free=%d, frag=%d%%"), ESP.getFreeHeap(), GenericESP::getHeapFragmentation());
   read();
-Log.verbose(F("After MOTD: Heap: free=%d, frag=%d%%\n"), ESP.getFreeHeap(), GenericESP::getHeapFragmentation());
 }
 
 void Messages::fromJSON(const JsonDocument& doc) {
   int currentYear = year();
   int totalMsgBytes = 0;
-Log.verbose("currentYear: %d", currentYear);
 
   for (JsonObjectConst day : doc["days"].as<JsonArray>()) {
     for (JsonArrayConst when : day["when"].as<JsonArray>()) {
       int theYear = when[0];
-Log.verbose("theYear: %d", theYear);
       if (theYear == 0 || theYear == currentYear) {
         DayMessages d;
         d.month = when[1];
         d.day = when[2];
         for (JsonVariantConst m : day["msgs"].as<JsonArray>()) {
-Log.verbose("Entering loop on day[msgs], day = %d", d.day);
           const char* msgRef = m;
           d.msgs.push_back(strdup(msgRef));
           totalMsgBytes += (strlen(msgRef)+1);
-if (theYear == 2023) Log.verbose("Adding %s", msgRef);
         }
         dayMsgs.push_back(d);
         break;
