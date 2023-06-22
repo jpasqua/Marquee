@@ -15,7 +15,7 @@ public:
   virtual void display(bool) override {
     auto& mtx = Display.mtx;
 
-    mtx->fillScreen(Theme::Color_BLACK);
+    Display.fillWith(Theme::Color_BLACK);
     Display.setFont(Display.BuiltInFont_ID);
     mtx->setCursor(0, 0);
     if (mtx->width() >= 64) {

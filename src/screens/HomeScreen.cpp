@@ -43,10 +43,12 @@ void HomeScreen::display(bool activating) {
   if (activating) {
     Display.setFont(Display.BuiltInFont_ID);
     _nextScreenTime = millis() + settings.displayTime*1000L;
+    // MTX_Display::Region leftHalf = {0, 0, 31, 8};
+    // Display.setRegion(leftHalf);
   }
 
   _colonVisible = false;
-  mtx->fillScreen(Theme::Color_BLACK);
+  Display.fillWith(Theme::Color_BLACK);
 
   int  m = minute();
   int  h = mqSettings->uiOptions.use24Hour ? hour() : hourFormat12();
