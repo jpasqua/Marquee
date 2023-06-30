@@ -45,18 +45,19 @@ void MOTDScreen::innerActivation() {
 // ----- MOTDScreen Private Functions
 //
 
+static uint16_t timeIndex = 0;
+static uint16_t dotwIndex = 0;
+
 void MOTDScreen::updateText() {
   time_t timeNow = now();
   int theDay = day(timeNow);
   int theMonth = month(timeNow);
   int theHour = hour(timeNow);
 
-  counter++;
-
   // Check whether we're on a special day
   for (auto d: msgs.dayMsgs) {
     if (d.month == theMonth && d.day == theDay) {
-      setText(d.msgs[random(0, d.msgs.size())], Display.BuiltInFont_ID);
+      setText(d.msgs[timeIndex++ % d.msgs.size()], Display.BuiltInFont_ID);
       return;
     }
   }
@@ -64,13 +65,14 @@ void MOTDScreen::updateText() {
   if (counter > msgs.dotwCount) {
     counter = 0;
     std::vector<const char*>& v = msgs.daysOfTheWeek[weekday()-1];
-    setText(v[random(0, v.size())], Display.BuiltInFont_ID);
+    setText(v[dotwIndex++ % v.size()], Display.BuiltInFont_ID);
     return;
   }
 
   for (auto t: msgs.timeMsgs) {
     if (theHour >= t.startHour && theHour < t.endHour) {
-      setText(t.msgs[random(0, t.msgs.size())], Display.BuiltInFont_ID);
+      setText(t.msgs[timeIndex++ % t.msgs.size()], Display.BuiltInFont_ID);
+      counter++;
       return;
     }
   }
@@ -137,7 +139,7 @@ void Messages::fromJSON(const JsonDocument& doc) {
     }
     dayIndex++;
   }
-logSettings();
+
   dotwCount = doc["dotwCount"];
 }
 
