@@ -39,10 +39,12 @@
 
 
 //
-// SECTION 2: [CUSTOMIZE] Choose a specific configuration
+// SECTION 2: [CUSTOMIZE] Choose a specific configuration & options
 //
 #define SelectedConfig Config_D1Mini
 // #define BME_SENSOR  MOCK
+// #define TwoLines
+
 
 //
 // SECTION 3: The definitions of the available configurations
@@ -60,8 +62,13 @@
   constexpr Basics::Pin Wiring_MOSI = D7;  // DIN
   constexpr Basics::Pin Wiring_CLK  = D5;
   constexpr Basics::Pin Wiring_CS   = D6;
-  constexpr uint8_t hDisplays = 8;
-  constexpr uint8_t vDisplays = 1;
+  #if defined(TwoLines)
+    constexpr uint8_t hDisplays = 4;
+    constexpr uint8_t vDisplays = 2;
+  #else
+    constexpr uint8_t hDisplays = 8;
+    constexpr uint8_t vDisplays = 1;
+  #endif
 
   // ----- Buttons
   // constexpr Basics::Pin physicalButtons[] =  { D3 }; // This is the "Flash" button

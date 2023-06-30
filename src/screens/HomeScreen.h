@@ -37,7 +37,8 @@ public:
 
 class HomeScreen : public Screen, public SettingsOwner {
 public:
-  HomeScreen();
+  HomeScreen(bool autoAdvance = true);
+
   virtual void display(bool) override;
   virtual void processPeriodicActivity() override;
   virtual void settingsHaveChanged();
@@ -50,7 +51,7 @@ private:
   uint32_t _nextScreenTime = 0;
   uint16_t _compositeTime = 0;
   bool _colonVisible = true;
-  bool _showInfoScreen;
+  bool _autoAdvance = true;
 
   void toggleColon();
   void drawProgressBar();

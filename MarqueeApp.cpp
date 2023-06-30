@@ -83,7 +83,11 @@ void MarqueeApp::create() {
   PluginMgr::setFactory(pluginFactory);
   MarqueeApp* app = new MarqueeApp(&theSettings);
 
+#if defined(TwoLines)
+  app->begin(false, Basics::UnusedPin, Basics::UnusedPin, true);
+#else
   app->begin();
+#endif
 }
 
 
@@ -176,7 +180,6 @@ void MarqueeApp::app_conditionalUpdate(bool force) {
 Screen* MarqueeApp::app_registerScreens() {
   // CUSTOM: Register any app-specific Screen objects
   splashScreen = new SplashScreen();
-  homeScreen = new HomeScreen();
   nextPrinterScreen = new NextPrinterScreen();
   allPrinterScreen = new AllPrinterScreen();
   motdScreen = new MOTDScreen();
@@ -184,20 +187,31 @@ Screen* MarqueeApp::app_registerScreens() {
   dateScreen = new DateScreen();
   
   ScreenMgr.registerScreen("Splash", splashScreen, true);
-  ScreenMgr.registerScreen("Home", homeScreen);
   ScreenMgr.registerScreen("Date", dateScreen);
   ScreenMgr.registerScreen("NextPrint", nextPrinterScreen);
   ScreenMgr.registerScreen("AllPrints", allPrinterScreen);
   ScreenMgr.registerScreen("MOTD", motdScreen);
   ScreenMgr.registerScreen("News", newsScreen);
+#if defined(TwoLines)
+  homeScreen = new HomeScreen(false);
+  ScreenMgr.enableTwoLineOperation(homeScreen);
+  ScreenMgr.setAsHomeScreen(dateScreen);
+#else
+  homeScreen = new HomeScreen(true);
+  ScreenMgr.registerScreen("Home", homeScreen);
   ScreenMgr.setAsHomeScreen(homeScreen);
+#endif
 
   // CUSTOM: Associate a confirm/cancel buttons with the reboot screen
   screens.rebootScreen->setButtons(hwConfig.advanceButton, hwConfig.previousButton);
 
   // CUSTOM: Add a sequence of screens that the user can cycle through
   auto& sequence = ScreenMgr.sequence;
+#if defined(TwoLines)
+  sequence.push_back(dateScreen);
+#else
   sequence.push_back(homeScreen);
+#endif
   sequence.push_back(wtAppImpl->screens.weatherScreen);
   sequence.push_back(wtAppImpl->screens.forecastScreen);
   // Add any plugins to the sequence

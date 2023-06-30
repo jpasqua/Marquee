@@ -15,10 +15,10 @@ public:
   virtual void display(bool) override {
     auto& mtx = Display.mtx;
 
-    Display.fillWith(Theme::Color_BLACK);
+    mtx->fillScreen(Theme::Color_BLACK);
     Display.setFont(Display.BuiltInFont_ID);
     mtx->setCursor(0, 0);
-    if (mtx->width() >= 64) {
+    if (Display.width() >= 64) {
       mtx->print("Starting");
       mtx->setCursor(46, 0); mtx->print(".");
       mtx->setCursor(49, 0); mtx->print(".");

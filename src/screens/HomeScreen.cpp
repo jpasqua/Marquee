@@ -17,7 +17,9 @@
 
 static inline uint16_t compose(int h, int m) { return(h * 100 + m); }
 
-HomeScreen::HomeScreen() {
+HomeScreen::HomeScreen(bool autoAdvance) {
+  _autoAdvance = autoAdvance;
+
   settings.displayTime = UINT32_MAX;
   settings.read();
 
@@ -26,29 +28,18 @@ HomeScreen::HomeScreen() {
     settings.pbOrientation = HSSettings::PBO_Vertical;
     settings.write();
   }
-
-  _showInfoScreen = true;
 }
 
 void HomeScreen::display(bool activating) {
   auto& mtx = Display.mtx;
 
-  if (_showInfoScreen) {
-    _showInfoScreen = false;
-    wtAppImpl->screens.infoScreen->goHomeWhenComplete(true);
-    ScreenMgr.display(wtAppImpl->screens.infoScreen);
-    return;
-  }
-
   if (activating) {
     Display.setFont(Display.BuiltInFont_ID);
     _nextScreenTime = millis() + settings.displayTime*1000L;
-    // MTX_Display::Region leftHalf = {0, 0, 31, 8};
-    // Display.setRegion(leftHalf);
   }
 
   _colonVisible = false;
-  Display.fillWith(Theme::Color_BLACK);
+  mtx->fillScreen(Theme::Color_BLACK);
 
   int  m = minute();
   int  h = mqSettings->uiOptions.use24Hour ? hour() : hourFormat12();
@@ -61,7 +52,7 @@ void HomeScreen::display(bool activating) {
   timeBuf[2] = (m/10) + '0';
   timeBuf[3] = (m%10) + '0';
 
-  mtx->drawChar( 0, 0, timeBuf[0], Theme::Color_WHITE, Theme::Color_BLACK, 1);
+  mtx->drawChar( 1, 0, timeBuf[0], Theme::Color_WHITE, Theme::Color_BLACK, 1);
   mtx->drawChar( 6, 0, timeBuf[1], Theme::Color_WHITE, Theme::Color_BLACK, 1);
   mtx->drawChar(14, 0, timeBuf[2], Theme::Color_WHITE, Theme::Color_BLACK, 1);
   mtx->drawChar(20, 0, timeBuf[3], Theme::Color_WHITE, Theme::Color_BLACK, 1);
@@ -72,7 +63,7 @@ void HomeScreen::display(bool activating) {
 
   toggleColon();
 
-  if ((mtx->width() >= 64) && (mqApp->owmClient != nullptr)) {
+  if ((Display.width() >= 64) && (mqApp->owmClient != nullptr)) {
     constexpr int charWidthIncludingSpace = 6;
     int temp = 0;
 #if defined(HAS_WEATHER_SENSOR)
@@ -83,7 +74,7 @@ void HomeScreen::display(bool activating) {
     int nChars = 1; // For the 'C' or 'F'
     nChars += temp < 0 ? 1 : 0; // Add space for the minus sign if needed
     nChars += temp > 99 ? 2 : (temp > 9 ? 2 : 1); // Space for the digits
-    uint16_t x = mtx->width() - (nChars * charWidthIncludingSpace);
+    uint16_t x = Display.width() - (nChars * charWidthIncludingSpace);
     uint16_t y = 0;
     mtx->setCursor(x, y);
     mtx->print(temp);
@@ -98,7 +89,7 @@ void HomeScreen::display(bool activating) {
 void HomeScreen::processPeriodicActivity() {
   static uint32_t _colonLastToggledAt = 0;
   uint32_t curMillis = millis();
-  if (curMillis > _nextScreenTime) {
+  if (_autoAdvance && curMillis > _nextScreenTime) {
     ScreenMgr.moveThroughSequence(true);
     return;
   }
@@ -135,9 +126,6 @@ void HomeScreen::drawProgressBar() {
   String completionTime;
   uint32_t timeRemaining;
 
-  String printerName;
-  String fileName;
-
   if (mqApp->printerGroup->nextCompletion(whichPrinter, completionTime, timeRemaining)) {
     PrintClient* p = mqApp->printerGroup->getPrinter(whichPrinter);
     float pct = p->getPctComplete()/100.0;
@@ -167,7 +155,7 @@ void HSSettings::fromJSON(const JsonDocument &doc) {
   displayTime = doc["displayTime"];
   String pboAsString = doc["pbOrientation"];
   pbOrientation = PBO_None;
-  if (pboAsString.equalsIgnoreCase("hortizontal")) pbOrientation = PBO_Horizontal;
+  if (pboAsString.equalsIgnoreCase("Horizontal")) pbOrientation = PBO_Horizontal;
   else if (pboAsString.equalsIgnoreCase("vertical")) pbOrientation = PBO_Vertical;
 }
 
