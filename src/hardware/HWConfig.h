@@ -43,7 +43,7 @@
 //
 #define SelectedConfig Config_D1Mini
 // #define BME_SENSOR  MOCK
-// #define TwoLines
+#define TwoLines
 
 
 //
@@ -63,12 +63,13 @@
   constexpr Basics::Pin Wiring_CLK  = D5;
   constexpr Basics::Pin Wiring_CS   = D6;
   #if defined(TwoLines)
-    constexpr uint8_t hDisplays = 4;
+    constexpr uint8_t hDisplays = 8;
     constexpr uint8_t vDisplays = 2;
   #else
     constexpr uint8_t hDisplays = 8;
     constexpr uint8_t vDisplays = 1;
   #endif
+  constexpr bool zigZag = true;
 
   // ----- Buttons
   // constexpr Basics::Pin physicalButtons[] =  { D3 }; // This is the "Flash" button
@@ -87,8 +88,14 @@
   constexpr Basics::Pin Wiring_MOSI = 23;  // DIN
   constexpr Basics::Pin Wiring_CLK  = 18;
   constexpr Basics::Pin Wiring_CS   = 5;
-  constexpr uint8_t hDisplays = 8;
-  constexpr uint8_t vDisplays = 1;
+  #if defined(TwoLines)
+    constexpr uint8_t hDisplays = 8;
+    constexpr uint8_t vDisplays = 2;
+  #else
+    constexpr uint8_t hDisplays = 8;
+    constexpr uint8_t vDisplays = 1;
+  #endif
+  constexpr bool zigZag = true;
 
   // ----- Buttons
   constexpr Basics::Pin physicalButtons[] = { 13 };
@@ -138,14 +145,15 @@ public:
 
   const Basics::Pin advanceButton;
   const Basics::Pin previousButton;
+
 };
 
 constexpr HWConfig hwConfig {
   { Basics::UnusedPin, Basics::UnusedPin, Wiring_MOSI, Basics::UnusedPin, Wiring_CLK },
-  { Wiring_CS, Wiring_MOSI, Wiring_CLK, hDisplays, vDisplays },
+  { Wiring_CS, Wiring_MOSI, Wiring_CLK, hDisplays, vDisplays, zigZag },
   physicalButtons, ARRAY_SIZE(physicalButtons),  
   syntheticGrounds, ARRAY_SIZE(syntheticGrounds),
-  physicalButtons[0], Basics::UnusedPin
+  physicalButtons[0], Basics::UnusedPin,
 };
 
 
