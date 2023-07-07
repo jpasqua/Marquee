@@ -2,17 +2,57 @@
 <script src='//openweathermap.org/themes/openweathermap/assets/vendor/owm/js/d3.min.js'></script>
 
 <style>
+  .grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+  
+  .printer-card {
+    border: 1px solid #ddd;
+    padding: 5px;
+    text-align: center;
+    word-break: break-all;
+    font-size: 15px;
+  }
+  
+  .progress-bar {
+    width: 100\%;
+    height: 20px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .progress-bar-inner {
+    height: 100\%;
+    background-color: #4CAF50;
+    width: 0;
+    transition: width 0.3s ease-in-out;
+  }
+  
+  .progress-label {
+    position: absolute;
+    top: 50\%;
+    left: 50\%;
+    transform: translate(-50\%, -50\%);
+    color: #000;
+  }
+  
+  @media screen and (max-width: 600px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+  }
+
   .aligned { display: flex; align-items: center; }
   .aligned > img { margin-right: 10px; }
-  .PRT_INFO::before {
-    content: "\\2022"; /* Unicode value of bullet symbol */
-    float: left;
-    display: "inline-block";
-  }
 </style>
 
-<div id="PRINTER_AREA" class='w3-row' style='display:none'>
+<div id="PRINTER_BLOCK" style='display:none;'>
   <h2>Printer Status</h2>
+  <div id="PRINTER_AREA" class='grid-container'> </div>
 </div>
 
 <div class='w3-row'>
@@ -40,27 +80,26 @@
   }
 
   function fillPrinterFields(printerInfo, onElement) {
-    $(onElement).append("<div class='PRT_INFO'></div>");
+    $(onElement).append("<div class='printer-card'></div>");
     let theContainer = $(onElement).children().last();
-    let content = 
-      "<div style='display:inline-block;''><div class='w3-cell w3-container'>" +
-      "  <a href='" + printerInfo.url + "'>" + printerInfo.name + "</a>";
+    let content = "<b><a href='"; content += printerInfo.url + "'>" + printerInfo.name + "</a></b>";
     if (printerInfo.hasOwnProperty("pct")) {
-      content += 
-        ": " + printerInfo.pct + "\%"+ "</div>" +
-        "<div class='w3-cell w3-container'>" +
-        "  Time Remaining: " + Math.floor(printerInfo.remaining/60) + "H:" + printerInfo.remaining\%60 + "M" + 
-        "</div>";
-      content += "<div class='PRT_CMPLT w3-cell w3-container'>";
+      content += "<div class='progress-bar'> <div class='progress-bar-inner' style='width: ";
+      content += printerInfo.pct;
+      content += "\%;'></div><span class='progress-label'>";
+      content += printerInfo.pct;
+      content += "\%</span></div>";
       if (printerInfo.pct == 100) {
         content += "<span onclick='ackPrinter(";
         content += printerInfo.i;
         content += ");' style='cursor: pointer; color:blue'>Complete</span>";
-      } else content += "Complete At: " + printerInfo.completeAt;
-      content += "</div>";
-      content += "<div class='w3-row w3-container'>" + printerInfo.file + "</div></div>";
-    } else {
-      content += "</div></div>";
+      } else {
+        content += printerInfo.completeAt;
+        content += " (" + Math.floor(printerInfo.remaining/60) + "H:" + printerInfo.remaining\%60 + "M)"
+      }
+      content += "<br><small>";
+      content += printerInfo.file;
+      content += "</small></p>";
     }
     $(theContainer).append(content);
   }
@@ -124,9 +163,10 @@
     });
     printerInfo.forEach(function(cur, index) {
       if (!cur.hasOwnProperty("name")) return;  // Skip empty (inactive) printers
+      if (cur.hasOwnProperty('file')) cur.file = cur.file.replace(/\\.gcode$/i, "");
       fillPrinterFields(cur, "#PRINTER_AREA");
     });
-    $("#PRINTER_AREA").css("display", "block");
+    $("#PRINTER_BLOCK").css("display", "block");
   }
 
   if (newsSettings.enabled) {
