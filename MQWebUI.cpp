@@ -128,10 +128,7 @@ namespace MQWebUI {
           else if (strcmp(subkey, "PASS") == 0) val = printer->pass;
           else if (strcmp(subkey, "NICK") == 0) val = printer->nickname;
           else if (strcmp(subkey, "MOCK") == 0) val = WebUIHelper::checkedOrNot[printer->mock];
-          else if (strcmp(subkey, "T_") == 0) {
-            subkey = &subkey[2];
-            if (strcmp(subkey, printer->type.c_str()) == 0) val = "selected";
-          } 
+          else if (type.equals(subkey)) { val = "selected"; } 
         }
         else if (key.equals("PM_ENABLED")) val = WebUIHelper::checkedOrNot[mqSettings->printMonitorEnabled];
         else if (key.equals("SHOW_DEV")) val = WebThing::settings.showDevMenu ? "true" : "false";
@@ -177,16 +174,14 @@ namespace MQWebUI {
       WebUI::wrapWebAction("/ackPrinterDone", action);
     }
 
-    void debugScreen() {
+    void resetScreen() {
       auto action = []() {
         Display.mtx->reset();
-        Display.fillRect(0, 0, 8, 8, 1);
-        Display.fillRect(2, 2, 4, 4, 0);
         WebUI::redirectHome();
         delay(500);
       };
 
-      WebUI::wrapWebAction("/debugScreen", action, false);
+      WebUI::wrapWebAction("/resetScreen", action, false);
     }
 
     void updateSettingsForScreen(
@@ -332,7 +327,7 @@ namespace MQWebUI {
     WebUI::registerHandler("/updateMQConfig",         Endpoints::updateMQConfig);
     WebUI::registerHandler("/ackPrinterDone",         Endpoints::ackPrinterDone);
 
-    WebUI::registerHandler("/debugScreen",            Endpoints::debugScreen);
+    WebUI::registerHandler("/resetScreen",            Endpoints::resetScreen);
   }
 
 }
