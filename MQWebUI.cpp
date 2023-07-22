@@ -9,6 +9,8 @@
 //                                  Core Libraries
 //                                  Third Party Libraries
 #include <ArduinoLog.h>
+#include <BPABasics.h>
+#include <Output.h>
 //                                  WebThing Includes
 #include <WebThing.h>
 #include <WebUI.h>
@@ -87,22 +89,51 @@ namespace MQWebUI {
       WebUI::wrapWebPage("/presentMOTDPage", "/MOTDForm.html", mapper);
     }
 
+#define TEMP_TO_STRING(t, s) {                                    \
+  if (isnan(wReadings.temp)) s = "N/A";                           \
+  else s = String(Output::temp(t), 1) + Output::tempUnits();      \
+}
+#define HUMI_TO_STRING(h, s) {                                    \
+  if (isnan(wReadings.humidity)) s = "N/A";                       \
+  else s = String(wReadings.humidity, 1) + '%';                   \
+}
+
+    bool mapsensorSettings(const String& key, String& val) {
+      #if defined(HAS_WEATHER_SENSOR)
+        const WeatherReadings& wReadings = mqApp->weatherMgr.getLastReadings();
+        if (key == "HAS_WTHR")  val = "true";
+        else if (key == "TEMP_CORRECT") { 
+          float tempCorrection = wtApp->settings->uiOptions.useMetric ? 
+            mqSettings->sensorSettings.tempCorrection :
+            Basics::delta_c_to_f(mqSettings->sensorSettings.tempCorrection);
+          val.concat(tempCorrection);
+        }
+        else if (key == "HUMI_CORRECT") val.concat(mqSettings->sensorSettings.humiCorrection);
+        else if (key == "RAW_TEMP") {
+          float rawTemp = wReadings.temp - mqSettings->sensorSettings.tempCorrection;
+          TEMP_TO_STRING(rawTemp, val);
+        }
+        else if (key == "RAW_HUMI") {
+          float rawHumi = wReadings.humidity - mqSettings->sensorSettings.humiCorrection;
+          HUMI_TO_STRING(wReadings.humidity, val);
+        }
+        else if (key == "TEMP") { TEMP_TO_STRING(wReadings.temp, val); }
+        else if (key == "HUMI") { HUMI_TO_STRING(wReadings.humidity, val); }
+        else return false;
+        return true;
+      #else
+        if (key == "HAS_WTHR") { val = "false"; return true; }
+        return false;
+      #endif
+    }
+
     void presentMQconfig() {
       auto mapper =[&](const String &key, String& val) -> void {
         if (key == "SCROLL_DELAY")    val = mqSettings->scrollDelay;
 
-        if (key == "HAS_WTHR") {
-          #if defined(HAS_WEATHER_SENSOR)
-            val = "true";
-          #else
-            val = "false";
-          #endif
-        }
         else if (key == "AIO_KEY")    val = mqSettings->aio.key;
         else if (key == "AIO_USER")   val = mqSettings->aio.username;
         else if (key == "AIO_GROUP")  val = mqSettings->aio.groupName;
-        else if (key == "TEMP_CORRECT") val = mqSettings->sensorSettings.tempCorrection;
-        else if (key == "HUMI_CORRECT") val = mqSettings->sensorSettings.humiCorrection;
 
         else if (key.equals(F("WS_SETTINGS"))) wtAppImpl->screens.weatherScreen->settings.toJSON(val);
         else if (key.equals(F("FS_SETTINGS"))) wtAppImpl->screens.forecastScreen->settings.toJSON(val);
@@ -112,6 +143,8 @@ namespace MQWebUI {
         else if (key.equals(F("NS_SETTINGS"))) mqApp->newsScreen->settings.toJSON(val);
 
         else if (key.equals("PM_ENABLED")) val = mqSettings->printMonitorEnabled;
+
+        else mapsensorSettings(key, val);
       };
 
       WebUI::wrapWebPage("/presentMQconfig", "/ConfigForm.html", mapper);
@@ -265,8 +298,14 @@ namespace MQWebUI {
         mqSettings->aio.groupName = WebUI::arg("aioGroup");
 
         // Sensor Settings
-        mqSettings->sensorSettings.tempCorrection = WebUI::arg("tempCorrection").toFloat();
+        float tempCorrection = WebUI::arg("tempCorrection").toFloat();
+        mqSettings->sensorSettings.tempCorrection = wtApp->settings->uiOptions.useMetric ?
+            tempCorrection : Basics::delta_f_to_c(tempCorrection);
         mqSettings->sensorSettings.humiCorrection = WebUI::arg("humiCorrection").toFloat();
+        mqApp->weatherMgr.setAttributes(
+          mqSettings->sensorSettings.tempCorrection,
+          mqSettings->sensorSettings.humiCorrection,
+          WebThing::settings.elevation);
 
         mqSettings->write();
 
