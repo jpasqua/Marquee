@@ -190,7 +190,10 @@
       Select the fields you'd like to see and drag them into your preferred order
       <div id="apFields" class="w3-margin-bottom">
       </div>
-      <div class="w3-row w3-padding"></div>
+      <div class='w3-row'>
+        <input type='checkbox' id='apsExcludeNext'>
+        <label>&nbsp;Exclude the printer that will finish next?</label>
+      </div>
       <button class='w3-button w3-block w3-round-large w3-grey' type='submit' onclick="handleAPSave()">Save&nbsp;<span id='APResultArea' class='w3-margin-left' style='font-style: italic;'></span></button>
     </div>
   </div>
@@ -342,6 +345,7 @@
 
   function handleAPSave() {
     var theSettings = { fields: getList('#apFields') };
+    theSettings.excludeNext = $("#apsExcludeNext").is(':checked');
     doSubmit(theSettings, "/updateAPSSettings", "#APResultArea");
   }
 
@@ -448,6 +452,7 @@
   var apsSettings = JSON.parse('%APS_SETTINGS%');
   createList(apsSettings.fields, '#apFields');
   new Sortable(apFields, { animation: 150, ghostClass: 'ghost' });
+  $("#apsExcludeNext").prop('checked', apsSettings.excludeNext);
 
   var nsSettings = JSON.parse('%NS_SETTINGS%');
   prepNewsScreenFields(nsSettings);

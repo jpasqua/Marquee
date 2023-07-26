@@ -55,6 +55,18 @@ void AllPrinterScreen::settingsHaveChanged() {
 
 // ----- Private Methods
 
+uint8_t nextPrinterToComplete() {
+  uint8_t whichPrinter;
+  String completionTime;
+  uint32_t timeRemaining;
+
+  if (mqApp->printerGroup->nextCompletion(whichPrinter, completionTime, timeRemaining)) {
+    return whichPrinter;
+  }
+
+  return -1;
+}
+
 void AllPrinterScreen::updateText() {
   _statusText = "";
   String printerName;
@@ -64,10 +76,11 @@ void AllPrinterScreen::updateText() {
   uint32_t timeLeft;
 
   if (mqSettings->printMonitorEnabled) {
+    auto nextPrinter = nextPrinterToComplete();
     for (int i = mqApp->printerGroup->numberOfPrinters()-1; i >= 0; i--) {
       if (mqSettings->printer[i].isActive) {
         PrintClient* p = mqApp->printerGroup->getPrinter(i);
-        if (p->getState() >= PrintClient::State::Complete) {
+        if (p->getState() >= PrintClient::State::Complete && (nextPrinter != i || !settings.excludeNext) ) {
           printerName = mqApp->printerGroup->getDisplayName(i);
           pctComplete = p->getPctComplete();
 
@@ -107,6 +120,7 @@ void AllPrinterScreen::updateText() {
       }
     }
   }
+
   setText(_statusText, Display.BuiltInFont_ID);
 }
 
@@ -123,10 +137,11 @@ APSSettings::APSSettings() {
 }
 
 void APSSettings::fromJSON(const JsonDocument &doc) {
+  excludeNext = doc["excludeNext"]|true;
+
   fields.clear();
 
   Field field;
-
   const JsonArrayConst& jsonFields = doc["fields"].as<JsonArray>();
   for (const auto& jsonField : jsonFields) {
      field.enabled = jsonField["on"];
@@ -136,6 +151,7 @@ void APSSettings::fromJSON(const JsonDocument &doc) {
 }
 
 void APSSettings::toJSON(JsonDocument &doc) {
+  doc["excludeNext"] = excludeNext;
   JsonArray jsonFields = doc.createNestedArray("fields");
   for (Field& field : fields) {
     JsonObject jsonField = jsonFields.createNestedObject();
@@ -146,6 +162,7 @@ void APSSettings::toJSON(JsonDocument &doc) {
 
 void APSSettings::logSettings() {
   Log.verbose(F("AllPrinterScreen Settings"));
+  Log.verbose(F("  Exclude Next Print: %T"), excludeNext);
   Log.verbose(F("  Fields"));
   for (const Field& field : fields) {
     Log.verbose(F("    %s, enabled: %T"), field.id.c_str(), field.enabled);

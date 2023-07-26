@@ -47,6 +47,7 @@ public:
   virtual void logSettings() override;
 
   std::vector<Field> fields;
+  bool excludeNext;
 };
 
 class AllPrinterScreen : public ScrollScreen, public SettingsOwner {
